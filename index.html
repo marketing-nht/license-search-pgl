@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PGL Procedure Lookup v3.0 (Pro)</title>
+  <title>PGL Procedure Lookup v3.1 (Full 13 Products)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -43,178 +43,269 @@
     import { 
       Search, FileText, Globe, Factory, ShieldCheck, 
       Zap, Wifi, Battery, AlertTriangle, BookOpen, Layers,
-      ChevronDown, ChevronUp, Box
+      ChevronDown, ChevronUp, Box, Monitor, Tv, Server, Phone
     } from 'lucide-react';
     import htm from 'htm';
     const html = htm.bind(React.createElement);
 
     // ==========================================
-    // DỮ LIỆU THỦ TỤC & TÍNH NĂNG CHI TIẾT
+    // DỮ LIỆU THỦ TỤC & TÍNH NĂNG CHI TIẾT (13 SẢN PHẨM)
     // ==========================================
     const PROCEDURES = [
-      // --- NHÓM 1: MÁY TÍNH XÁCH TAY (LAPTOP) ---
+      // 1. LAPTOP
       {
         id: "laptop",
-        name: "Máy tính xách tay (Laptop)",
-        group: "CNTT (MIC) & Năng lượng (MOIT)",
+        name: "1. Máy tính xách tay (Laptop)",
+        group: "CNTT (MIC) & Năng lượng",
         icon: Globe,
         features: [
-          { name: "An toàn điện", reg: "QCVN 132:2022/BTTTT", desc: "Thử nghiệm an toàn cho thiết bị CNTT (Bắt buộc)" },
-          { name: "Tương thích điện từ (EMC)", reg: "QCVN 118:2018/BTTTT", desc: "Thử nhiễu từ trường (Bắt buộc)" },
-          { name: "Kết nối Wifi (2.4/5GHz)", reg: "QCVN 54 & QCVN 65", desc: "Nếu tích hợp card Wifi (Module)" },
-          { name: "Kết nối Bluetooth", reg: "QCVN 54:2020", desc: "Nếu có Bluetooth" },
-          { name: "Pin Lithium (Bên trong)", reg: "QCVN 101:2020/BTTTT", desc: "Thử nghiệm an toàn cho Pin/Cell" },
-          { name: "Hiệu suất năng lượng", reg: "TCVN 11848:2021", desc: "Dán nhãn năng lượng (Bộ Công Thương)" }
+          { name: "An toàn điện", reg: "QCVN 132:2022/BTTTT", desc: "Bắt buộc thử nghiệm" },
+          { name: "EMC", reg: "QCVN 118:2018/BTTTT", desc: "Tương thích điện từ" },
+          { name: "Wifi/Bluetooth", reg: "QCVN 54, 65", desc: "Nếu có tích hợp" },
+          { name: "Pin Lithium", reg: "QCVN 101:2020", desc: "Thử an toàn Pin" },
+          { name: "Hiệu suất NL", reg: "TCVN 11848:2021", desc: "Dán nhãn năng lượng" }
         ],
         import_steps: [
-          "B1: Đăng ký Kiểm tra chất lượng (PQ) trên Cổng thông tin một cửa Quốc gia (VNSW).",
-          "B2: Mang hàng về bảo quản (Giải tỏa hàng hóa).",
-          "B3: Gửi mẫu thử nghiệm tại PGL (Safety, EMC, RF, Pin, VNEEP).",
-          "B4: Nhận kết quả thử nghiệm & Chứng nhận Hợp quy (Cục Viễn thông).",
-          "B5: Nộp hồ sơ hoàn thành kiểm tra trên VNSW -> Thông quan chính thức.",
-          "B6: Đăng ký dán nhãn năng lượng (Online Bộ Công Thương) -> Dán tem ICT & Năng lượng trước khi bán."
+          "B1: Đăng ký Kiểm tra chất lượng (PQ) trên Cổng 1 cửa (VNSW).",
+          "B2: Thử nghiệm toàn diện tại PGL.",
+          "B3: Chứng nhận Hợp quy (Cục Viễn thông).",
+          "B4: Hoàn tất hồ sơ PQ trên VNSW.",
+          "B5: Đăng ký dán nhãn năng lượng (Bộ Công Thương) -> Dán tem."
         ],
-        domestic_steps: [
-          "B1: Thử nghiệm mẫu điển hình tại PGL.",
-          "B2: Chứng nhận Hợp quy (Tại Cục Viễn thông).",
-          "B3: Công bố Hợp quy (Tại Cục Viễn thông).",
-          "B4: Đăng ký dán nhãn năng lượng (Bộ Công Thương).",
-          "B5: Dán tem và lưu thông."
-        ]
+        domestic_steps: ["B1: Thử nghiệm mẫu.", "B2: Chứng nhận Hợp quy.", "B3: Công bố Hợp quy.", "B4: Dán nhãn năng lượng."]
       },
-      // --- NHÓM 2: MÁY TÍNH BẢNG (TABLET) ---
+      // 2. TABLET
       {
         id: "tablet",
-        name: "Máy tính bảng (Tablet)",
+        name: "2. Máy tính bảng (Tablet)",
         group: "CNTT & Viễn thông",
         icon: Box,
         features: [
-          { name: "An toàn điện", reg: "QCVN 132:2022/BTTTT", desc: "Bắt buộc từ 01/01/2024" },
-          { name: "Tương thích điện từ", reg: "QCVN 18:2014 & QCVN 118:2018", desc: "EMC cho thiết bị vô tuyến" },
-          { name: "Kết nối 4G/LTE", reg: "QCVN 117:2023", desc: "Nếu có khe SIM 4G" },
-          { name: "Kết nối Wifi", reg: "QCVN 54 & 65", desc: "Wifi 2.4G và 5G" },
-          { name: "SAR (Hấp thụ sóng)", reg: "QCVN 134:2024", desc: "Đo mức hấp thụ riêng (Body SAR)" },
-          { name: "Hiệu suất năng lượng", reg: "TCVN 11848:2021", desc: "Dán nhãn năng lượng" }
+          { name: "An toàn điện", reg: "QCVN 132:2022", desc: "Bắt buộc" },
+          { name: "Wifi/4G/5G", reg: "QCVN 54, 65, 117", desc: "RF Test" },
+          { name: "SAR (Hấp thụ)", reg: "QCVN 134:2024", desc: "Đo SAR Body" },
+          { name: "Hiệu suất NL", reg: "TCVN 11848:2021", desc: "Dán nhãn năng lượng" }
         ],
         import_steps: [
-          "B1: Đăng ký KTCL hàng nhập khẩu (Cục Viễn Thông).",
-          "B2: Thử nghiệm trọn gói tại PGL.",
+          "B1: Đăng ký KTCL trên VNSW.",
+          "B2: Thử nghiệm mẫu tại PGL.",
           "B3: Chứng nhận Hợp quy (RF, SAR).",
-          "B4: Tự đánh giá sự phù hợp (Safety, EMC, Pin).",
-          "B5: Nộp kết quả lên Cục Viễn Thông để hoàn tất thủ tục nhập khẩu."
+          "B4: Tự đánh giá sự phù hợp (Safety, EMC).",
+          "B5: Thông quan & Dán nhãn."
         ],
-        domestic_steps: [
-          "B1: Thử nghiệm mẫu.",
-          "B2: Chứng nhận Hợp quy.",
-          "B3: Công bố Hợp quy.",
-          "B4: Dán tem ICT & Nhãn năng lượng."
-        ]
+        domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận & Công bố Hợp quy.", "B3: Dán tem."]
       },
-      // --- NHÓM 3: ĐIỀU HÒA KHÔNG KHÍ ---
+      // 3. DESKTOP
       {
-        id: "ac",
-        name: "Điều hòa không khí",
-        group: "Gia dụng (MOST) & Năng lượng",
-        icon: Factory,
+        id: "desktop",
+        name: "3. Máy tính để bàn (Desktop)",
+        group: "CNTT & Năng lượng",
+        icon: Monitor,
         features: [
-          { name: "Tương thích điện từ (EMC)", reg: "QCVN 9:2012/BKHCN", desc: "Chứng nhận CR (Bộ KHCN)" },
-          { name: "An toàn điện (LVD)", reg: "TCVN 5699-2-40", desc: "Thử nghiệm an toàn (IEC 60335)" },
-          { name: "Hiệu suất năng lượng", reg: "TCVN 7830:2021", desc: "Dán nhãn năng lượng (Sao năng lượng)" }
+          { name: "Hiệu suất NL", reg: "TCVN 13371:2021", desc: "Dán nhãn năng lượng" },
+          { name: "EMC", reg: "QCVN 118:2018", desc: "Tự công bố hợp quy" },
+          { name: "Wifi (Nếu có)", reg: "QCVN 54, 65", desc: "Nếu có card wifi" }
         ],
         import_steps: [
-          "B1: Đăng ký Kiểm tra nhà nước về chất lượng (Sở KHCN hoặc Chi cục TĐC) tại nơi mở tờ khai.",
-          "B2: Đăng ký thử nghiệm HSNL (Để dán nhãn năng lượng).",
-          "B3: Lấy mẫu tại cảng/kho -> Thử nghiệm tại PGL.",
-          "B4: PGL cấp Giấy chứng nhận Hợp quy (Lô hàng) & Kết quả thử nghiệm HSNL.",
-          "B5: Nộp lại cho Hải quan/Sở KHCN để thông quan."
+          "B1: Thử nghiệm HSNL & EMC tại PGL.",
+          "B2: Công bố dán nhãn năng lượng (Bộ Công Thương).",
+          "B3: Tự công bố hợp quy EMC (Sở TTTT)."
         ],
-        domestic_steps: [
-          "B1: Thử nghiệm mẫu điển hình tại PGL.",
-          "B2: Đánh giá quá trình sản xuất (Phương thức 5) -> Cấp chứng nhận Hợp quy 3 năm.",
-          "B3: Công bố Hợp quy tại Sở KHCN địa phương.",
-          "B4: Công bố dán nhãn năng lượng tại Bộ Công Thương."
-        ]
+        domestic_steps: ["B1: Thử nghiệm.", "B2: Công bố dán nhãn & Hợp quy."]
       },
-      // --- NHÓM 4: THIẾT BỊ WIFI / ROUTER ---
+      // 4. MOBILE PHONE
       {
-        id: "wifi",
-        name: "Modem / Router / Access Point",
+        id: "mobile",
+        name: "4. Điện thoại di động",
+        group: "Viễn thông (MIC)",
+        icon: Phone,
+        features: [
+          { name: "RF (2G/3G/4G/5G)", reg: "QCVN 117, 127", desc: "Tắt sóng 2G Only" },
+          { name: "Wifi/BT", reg: "QCVN 54, 65", desc: "Kết nối không dây" },
+          { name: "SAR", reg: "QCVN 134:2024", desc: "Đo an toàn bức xạ" },
+          { name: "Pin Lithium", reg: "QCVN 101:2020", desc: "An toàn pin" }
+        ],
+        import_steps: [
+          "B1: Đăng ký KTCL (Cục Viễn thông).",
+          "B2: Đo kiểm tại PGL.",
+          "B3: Chứng nhận Hợp quy.",
+          "B4: Công bố & Dán tem ICT."
+        ],
+        domestic_steps: ["B1: Đo kiểm.", "B2: Chứng nhận.", "B3: Công bố."]
+      },
+      // 5. TIVI
+      {
+        id: "tv",
+        name: "5. Ti vi (Television)",
+        group: "Gia dụng & Viễn thông",
+        icon: Tv,
+        features: [
+          { name: "Hiệu suất NL", reg: "TCVN 9536:2021", desc: "Dán nhãn năng lượng" },
+          { name: "DVB-T2", reg: "QCVN 63:2012", desc: "Đầu thu số tích hợp" },
+          { name: "Wifi/BT", reg: "QCVN 54, 65", desc: "Smart TV" },
+          { name: "EMC", reg: "QCVN 118:2018", desc: "Nếu có cổng LAN/Wifi" }
+        ],
+        import_steps: [
+          "B1: Đăng ký KTCL (Cho phần DVB-T2/Wifi).",
+          "B2: Thử nghiệm HSNL & RF.",
+          "B3: Chứng nhận & Công bố Hợp quy.",
+          "B4: Dán nhãn năng lượng."
+        ],
+        domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận & Công bố."]
+      },
+      // 6. SET TOP BOX
+      {
+        id: "stb",
+        name: "6. Đầu thu (Set Top Box)",
+        group: "Viễn thông (MIC)",
+        icon: Server,
+        features: [
+          { name: "DVB-T2", reg: "QCVN 63:2012", desc: "Thu truyền hình số" },
+          { name: "EMC", reg: "QCVN 118:2018", desc: "Tương thích điện từ" },
+          { name: "An toàn điện", reg: "QCVN 132:2022", desc: "Bắt buộc" }
+        ],
+        import_steps: [
+          "B1: Đăng ký KTCL trên VNSW.",
+          "B2: Thử nghiệm tại PGL.",
+          "B3: Công bố Hợp quy.",
+          "B4: Dán tem ICT."
+        ],
+        domestic_steps: ["B1: Thử nghiệm.", "B2: Công bố Hợp quy."]
+      },
+      // 7. MODEM WIFI
+      {
+        id: "wifi-router",
+        name: "7. Modem / Wifi Router",
         group: "Viễn thông (MIC)",
         icon: Wifi,
         features: [
-          { name: "Thu phát Wifi 2.4GHz", reg: "QCVN 54:2020/BTTTT", desc: "Công suất < 100mW (EIRP)" },
-          { name: "Thu phát Wifi 5GHz", reg: "QCVN 65:2021/BTTTT", desc: "Yêu cầu dùng trong nhà/ngoài trời" },
-          { name: "Tương thích điện từ (EMC)", reg: "QCVN 112:2017/BTTTT", desc: "EMC cho thiết bị vô tuyến" },
-          { name: "An toàn điện", reg: "QCVN 22:2010 (Nếu có)", desc: "Tùy loại thiết bị" }
+          { name: "Wifi 2.4G/5G", reg: "QCVN 54, 65", desc: "RF Test" },
+          { name: "EMC", reg: "QCVN 112:2017", desc: "EMC thiết bị vô tuyến" }
         ],
         import_steps: [
-          "B1: Đăng ký KTCL trên VNSW (Cục Viễn thông).",
-          "B2: Thử nghiệm RF & EMC tại PGL.",
-          "B3: Chứng nhận Hợp quy (Bắt buộc).",
-          "B4: Công bố Hợp quy (Self-declaration) dựa trên giấy chứng nhận.",
-          "B5: Dán tem ICT Code."
+          "B1: Đăng ký KTCL.",
+          "B2: Thử nghiệm & Chứng nhận Hợp quy.",
+          "B3: Công bố Hợp quy."
         ],
-        domestic_steps: [
-          "B1: Thử nghiệm mẫu.",
-          "B2: Chứng nhận Hợp quy.",
-          "B3: Công bố Hợp quy.",
-          "B4: Dán tem ICT."
-        ]
+        domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận & Công bố."]
       },
-      // --- NHÓM 5: LÒ VI SÓNG ---
+      // 8. DECT PHONE
       {
-        id: "microwave",
-        name: "Lò vi sóng (Microwave)",
-        group: "Gia dụng (MOST)",
+        id: "dect",
+        name: "8. Điện thoại DECT",
+        group: "Viễn thông (MIC)",
+        icon: Phone,
+        features: [
+          { name: "RF DECT", reg: "QCVN 22:2010", desc: "Tần số vô tuyến" },
+          { name: "EMC", reg: "QCVN 18:2014", desc: "Tương thích điện từ" },
+          { name: "An toàn", reg: "QCVN 132:2022", desc: "An toàn điện" }
+        ],
+        import_steps: [
+          "B1: Đăng ký KTCL.",
+          "B2: Chứng nhận Hợp quy.",
+          "B3: Công bố & Dán tem."
+        ],
+        domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận."]
+      },
+      // 9. ĐIỀU HÒA
+      {
+        id: "ac",
+        name: "9. Điều hòa không khí",
+        group: "Gia dụng (MOST) & Năng lượng",
         icon: Zap,
         features: [
-          { name: "An toàn điện", reg: "QCVN 4:2009/BKHCN", desc: "Sửa đổi 1:2016 (Bắt buộc)" },
-          { name: "Nhiễu điện từ (EMC)", reg: "QCVN 9:2012/BKHCN", desc: "Sửa đổi 1:2018 (Bắt buộc)" }
+          { name: "EMC", reg: "QCVN 9:2012/BKHCN", desc: "Chứng nhận CR" },
+          { name: "Hiệu suất NL", reg: "TCVN 7830:2021", desc: "Dán nhãn năng lượng" },
+          { name: "An toàn (LVD)", reg: "TCVN 5699-2-40", desc: "Thử nghiệm an toàn" }
         ],
         import_steps: [
-          "B1: Đăng ký kiểm tra chất lượng (Chi cục TĐC).",
-          "B2: Thử nghiệm mẫu tại PGL.",
-          "B3: Chứng nhận Hợp quy theo lô hàng (Phương thức 7).",
-          "B4: Nộp giấy chứng nhận cho Chi cục TĐC -> Thông quan."
+          "B1: Đăng ký Kiểm tra chất lượng (Sở KHCN).",
+          "B2: Thử nghiệm EMC & HSNL tại PGL.",
+          "B3: Chứng nhận Hợp quy (Lô hàng) & Kết quả HSNL.",
+          "B4: Thông quan & Dán tem."
         ],
-        domestic_steps: [
-          "B1: Thử nghiệm mẫu.",
-          "B2: Đánh giá nhà xưởng (Phương thức 5).",
-          "B3: Cấp chứng nhận Hợp quy (3 năm).",
-          "B4: Công bố hợp quy."
-        ]
+        domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận Hợp quy (3 năm).", "B3: Công bố.", "B4: Dán tem."]
       },
-      // --- NHÓM 6: ĐIỆN THOẠI DI ĐỘNG ---
+      // 10. TỦ LẠNH
       {
-        id: "mobile",
-        name: "Điện thoại di động",
-        group: "Viễn thông (MIC)",
+        id: "fridge",
+        name: "10. Tủ lạnh",
+        group: "Gia dụng & Năng lượng",
         icon: Box,
         features: [
-          { name: "Kết nối 4G LTE", reg: "QCVN 117:2023", desc: "Bắt buộc đo VoLTE (nếu có)" },
-          { name: "Kết nối 5G NR", reg: "QCVN 127, 129", desc: "Nếu hỗ trợ 5G" },
-          { name: "Wifi & Bluetooth", reg: "QCVN 54, 65", desc: "" },
-          { name: "Pin Lithium", reg: "QCVN 101:2020", desc: "An toàn pin" },
-          { name: "SAR (Hấp thụ)", reg: "QCVN 134:2024", desc: "Đo SAR vùng đầu và thân" },
-          { name: "An toàn & EMC", reg: "QCVN 132, 86, 18", desc: "" }
+          { name: "EMC", reg: "QCVN 9:2012/BKHCN", desc: "Chứng nhận CR" },
+          { name: "Hiệu suất NL", reg: "TCVN 7828:2016", desc: "Dán nhãn năng lượng" },
+          { name: "An toàn", reg: "TCVN 5699-2-24", desc: "IEC 60335-2-24" }
         ],
         import_steps: [
-          "B1: Đăng ký KTCL hàng nhập khẩu (Cục Viễn thông).",
-          "B2: Đo kiểm toàn diện các chỉ tiêu tại PGL.",
-          "B3: Chứng nhận Hợp quy (Cục Viễn thông cấp).",
-          "B4: Công bố Hợp quy và Dán tem ICT."
+          "B1: Đăng ký KTCL.",
+          "B2: Thử nghiệm EMC & HSNL.",
+          "B3: Chứng nhận Hợp quy.",
+          "B4: Dán tem CR & Năng lượng."
         ],
-        domestic_steps: [
-          "B1: Đo kiểm.",
-          "B2: Chứng nhận Hợp quy.",
-          "B3: Công bố Hợp quy."
-        ]
+        domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận 3 năm.", "B3: Dán tem."]
+      },
+      // 11. BẾP ĐIỆN
+      {
+        id: "stove",
+        name: "11. Bếp điện (Từ/Hồng ngoại)",
+        group: "Gia dụng & Năng lượng",
+        icon: Zap,
+        features: [
+          { name: "EMC", reg: "QCVN 9:2012/BKHCN", desc: "Chứng nhận CR" },
+          { name: "An toàn", reg: "TCVN 5699-2-9", desc: "Thử nghiệm LVD" },
+          { name: "Hiệu suất NL", reg: "TCVN 13372/13373", desc: "Dán nhãn năng lượng" }
+        ],
+        import_steps: [
+          "B1: Đăng ký KTCL (Sở KHCN).",
+          "B2: Thử nghiệm EMC & Safety.",
+          "B3: Chứng nhận Hợp quy (Lô hàng).",
+          "B4: Công bố HSNL (Bộ Công Thương)."
+        ],
+        domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận Hợp quy.", "B3: Công bố."]
+      },
+      // 12. ĐÈN LED
+      {
+        id: "led",
+        name: "12. Đèn LED",
+        group: "Gia dụng & Năng lượng",
+        icon: Zap,
+        features: [
+          { name: "An toàn & EMC", reg: "QCVN 19:2019/BKHCN", desc: "Bắt buộc CR" },
+          { name: "Hiệu suất NL", reg: "TCVN 11844:2017", desc: "Dán nhãn năng lượng" }
+        ],
+        import_steps: [
+          "B1: Đăng ký KTCL.",
+          "B2: Thử nghiệm QCVN 19 & HSNL.",
+          "B3: Chứng nhận Hợp quy.",
+          "B4: Dán tem CR & Năng lượng."
+        ],
+        domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận 3 năm.", "B3: Công bố."]
+      },
+      // 13. LÒ VI SÓNG
+      {
+        id: "microwave",
+        name: "13. Lò vi sóng",
+        group: "Gia dụng (MOST)",
+        icon: Box,
+        features: [
+          { name: "An toàn điện", reg: "QCVN 4:2009/BKHCN", desc: "Sửa đổi 1:2016" },
+          { name: "EMC", reg: "QCVN 9:2012/BKHCN", desc: "Sửa đổi 1:2018" },
+          { name: "Hiệu suất NL", reg: "TCVN 13663:2023", desc: "Dự thảo bắt buộc" }
+        ],
+        import_steps: [
+          "B1: Đăng ký KTCL.",
+          "B2: Thử nghiệm An toàn & EMC.",
+          "B3: Chứng nhận Hợp quy (Phương thức 7).",
+          "B4: Thông quan & Dán tem CR."
+        ],
+        domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận (Phương thức 5).", "B3: Dán tem."]
       }
     ];
 
-    // COMPONENT: CARD HIỂN THỊ
+    // COMPONENT: CARD
     const ProcedureCard = ({ item }) => {
-      const [isImport, setIsImport] = useState(true); // Toggle state: True = Import, False = Domestic
+      const [isImport, setIsImport] = useState(true);
       const [isOpen, setIsOpen] = useState(false);
 
       return html`
@@ -240,7 +331,7 @@
             <div className="border-t border-slate-100">
               <div className="p-6 bg-white">
                 <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4 flex items-center gap-2">
-                  <${ShieldCheck} size=${18} className="text-blue-600"/> Các tính năng cần thử nghiệm
+                  <${ShieldCheck} size=${18} className="text-blue-600"/> Tính năng & Quy chuẩn áp dụng
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   ${item.features.map((feat, idx) => html`
@@ -262,19 +353,12 @@
                   <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
                     <${Layers} size=${18} className="text-purple-600"/> Quy trình thực hiện
                   </h4>
-                  
                   <div className="flex bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
-                    <button 
-                      onClick=${() => setIsImport(true)}
-                      className=${`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${isImport ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
-                    >
+                    <button onClick=${() => setIsImport(true)} className=${`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${isImport ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}>
                       <${Globe} size=${14} /> Nhập khẩu
                     </button>
-                    <button 
-                      onClick=${() => setIsImport(false)}
-                      className=${`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${!isImport ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
-                    >
-                      <${Factory} size=${14} /> Sản xuất trong nước
+                    <button onClick=${() => setIsImport(false)} className=${`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${!isImport ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}>
+                      <${Factory} size=${14} /> Sản xuất
                     </button>
                   </div>
                 </div>
@@ -293,13 +377,6 @@
                       </div>
                     </div>
                   `)}
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-slate-200 flex items-start gap-3">
-                  <${AlertTriangle} size=${18} className="text-amber-500 shrink-0 mt-0.5"/>
-                  <p className="text-xs text-slate-500 italic">
-                    Lưu ý: Đối với hàng nhập khẩu, doanh nghiệp cần đăng ký tài khoản trên <span className="font-bold">Cổng thông tin một cửa quốc gia (VNSW)</span> để thực hiện đăng ký kiểm tra chất lượng. Đối với hàng sản xuất, cần duy trì hệ thống ISO 9001 tại nhà máy.
-                  </p>
                 </div>
               </div>
             </div>
@@ -321,45 +398,24 @@
 
       return html`
         <div className="min-h-screen flex flex-col md:flex-row bg-slate-100">
-          
           <aside className="w-full md:w-80 bg-white border-r border-slate-200 p-6 hidden md:block h-screen sticky top-0 overflow-y-auto">
             <div className="flex items-center gap-3 mb-10">
-              <div className="bg-indigo-600 p-3 rounded-xl text-white shadow-xl shadow-indigo-200">
-                <${BookOpen} size=${28} />
-              </div>
-              <div>
-                <h1 className="font-extrabold text-xl text-slate-900 tracking-tight">PGL Guide</h1>
-                <p className="text-xs text-slate-500 font-medium">Hệ thống tra cứu quy trình</p>
-              </div>
+              <div className="bg-indigo-600 p-3 rounded-xl text-white shadow-xl shadow-indigo-200"><${BookOpen} size=${28} /></div>
+              <div><h1 className="font-extrabold text-xl text-slate-900">PGL Guide</h1><p className="text-xs text-slate-500">Tra cứu thủ tục v3.1</p></div>
             </div>
-
             <div className="space-y-6">
               <div className="bg-blue-50 p-5 rounded-2xl border border-blue-100">
-                <h3 className="font-bold text-blue-900 text-sm mb-2 flex items-center gap-2">
-                  <${Globe} size=${16}/> Hàng Nhập khẩu
-                </h3>
-                <p className="text-xs text-blue-700 leading-relaxed">
-                  Áp dụng cơ chế "Hậu kiểm" hoặc "Kiểm tra lô hàng". Bắt buộc đăng ký trên Cổng 1 cửa Quốc gia (VNSW).
-                </p>
+                <h3 className="font-bold text-blue-900 text-sm mb-2"><${Globe} size=${16} className="inline mr-1"/> Hàng Nhập khẩu</h3>
+                <p className="text-xs text-blue-700">Đăng ký kiểm tra trên Cổng 1 cửa (VNSW) hoặc Sở KHCN địa phương.</p>
               </div>
-
               <div className="bg-emerald-50 p-5 rounded-2xl border border-emerald-100">
-                <h3 className="font-bold text-emerald-900 text-sm mb-2 flex items-center gap-2">
-                  <${Factory} size=${16}/> Sản xuất trong nước
-                </h3>
-                <p className="text-xs text-emerald-700 leading-relaxed">
-                  Áp dụng Phương thức 5 (Đánh giá quá trình sản xuất). Giấy chứng nhận có hiệu lực 3 năm.
-                </p>
+                <h3 className="font-bold text-emerald-900 text-sm mb-2"><${Factory} size=${16} className="inline mr-1"/> Sản xuất</h3>
+                <p className="text-xs text-emerald-700">Đánh giá nhà xưởng (Phương thức 5) và Chứng nhận 3 năm.</p>
               </div>
-
               <div className="pt-6 border-t border-slate-100">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Danh mục phổ biến</h4>
+                <h4 className="text-xs font-bold text-slate-400 uppercase mb-4">Sản phẩm phổ biến</h4>
                 <div className="flex flex-wrap gap-2">
-                  ${['Laptop', 'Điều hòa', 'Wifi', 'Pin', 'Tivi', 'Lò vi sóng'].map(tag => html`
-                    <button onClick=${() => setQuery(tag)} className="px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded-full text-xs text-slate-600 transition-colors">
-                      ${tag}
-                    </button>
-                  `)}
+                  ${['Laptop', 'Điều hòa', 'Wifi', 'Led', 'Tivi'].map(t => html`<button onClick=${() => setQuery(t)} className="px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded-full text-xs text-slate-600">${t}</button>`)}
                 </div>
               </div>
             </div>
@@ -368,31 +424,15 @@
           <main className="flex-1 p-4 md:p-10 h-screen overflow-y-auto">
             <div className="max-w-4xl mx-auto">
               <div className="mb-8">
-                <h2 className="text-3xl font-black text-slate-900 mb-2">Tra cứu Thủ tục Hợp quy</h2>
-                <p className="text-slate-500">Hướng dẫn chi tiết quy trình Thử nghiệm, Chứng nhận & Công bố cho từng loại sản phẩm.</p>
+                <h2 className="text-3xl font-black text-slate-900 mb-2">Tra cứu Thủ tục</h2>
+                <p className="text-slate-500">Hướng dẫn 13 nhóm sản phẩm theo quy định mới nhất 2026</p>
               </div>
-
               <div className="relative mb-8 group z-10">
-                <${Search} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size=${22} />
-                <input 
-                  type="text" 
-                  className="w-full pl-14 pr-6 py-4 bg-white border-2 border-slate-200 rounded-2xl shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all text-lg placeholder:text-slate-400"
-                  placeholder="Nhập tên sản phẩm (VD: Laptop, Tủ lạnh)..."
-                  value=${query}
-                  onChange=${e => setQuery(e.target.value)}
-                  autoFocus
-                />
+                <${Search} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500" size=${22} />
+                <input type="text" className="w-full pl-14 pr-6 py-4 bg-white border-2 border-slate-200 rounded-2xl shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all text-lg" placeholder="Tìm sản phẩm..." value=${query} onChange=${e => setQuery(e.target.value)} autoFocus />
               </div>
-
               <div className="space-y-4">
-                ${filteredData.length > 0 ? filteredData.map(item => html`
-                  <${ProcedureCard} key=${item.id} item=${item} />
-                `) : html`
-                  <div className="flex flex-col items-center justify-center py-20 opacity-60">
-                    <${FileText} size=${64} className="text-slate-300 mb-4"/>
-                    <p className="text-slate-500 font-medium">Không tìm thấy dữ liệu phù hợp</p>
-                  </div>
-                `}
+                ${filteredData.map(item => html`<${ProcedureCard} key=${item.id} item=${item} />`)}
               </div>
             </div>
           </main>
