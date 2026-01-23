@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PGL Procedure Assistant</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; }
+    .animate-in { animation: fadeIn 0.4s ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    
+    /* Badge Colors */
+    .badge-mic { background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; } /* Bộ TTTT */
+    .badge-most { background-color: #fce7f3; color: #9d174d; border: 1px solid #fbcfe8; } /* Bộ KHCN */
+    .badge-moit { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; } /* Bộ Công Thương */
+  </style>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@18.2.0",
+      "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+      "lucide-react": "https://esm.sh/lucide-react@0.294.0",
+      "htm": "https://esm.sh/htm@3.1.1"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="module">
+    import React, { useState, useMemo } from 'react';
+    import ReactDOM from 'react-dom/client';
+    import { 
+      Search, BookOpen, ShieldCheck, FileText, CheckCircle, 
+      AlertCircle, Zap, Wifi, Monitor, Snowflake, Filter, ChevronDown, ChevronUp
+    } from 'lucide-react';
+    import htm from 'htm';
+
+    const html = htm.bind(React.createElement);
+
+    // ==========================================
+    // DỮ LIỆU THỦ TỤC (Dựa trên danh sách file CSV bạn gửi)
+    // ==========================================
+    const PROCEDURE_DATA = [
+      // --- NHÓM 1: CÔNG NGHỆ THÔNG TIN (MIC) ---
+      {
+        id: "laptop",
+        name: "Máy tính xách tay (Laptop)",
+        category: "CNTT (MIC)",
+        icon: Monitor,
+        source_file: "1-Laptop.csv",
+        regulations: [
+          { type: "An toàn (Safety)", code: "QCVN 132:2022/BTTTT", body: "MIC" },
+          { type: "EMC", code: "QCVN 118:2018/BTTTT", body: "MIC" },
+          { type: "Vô tuyến (Wifi/BT)", code: "QCVN 54:2020 & QCVN 65:2021", body: "MIC" },
+          { type: "Năng lượng (VNEEP)", code: "TCVN 11848:2021", body: "MOIT" }
+        ],
+        procedure_steps: [
+          "B1: Thử nghiệm An toàn, EMC & RF tại PGL.",
+          "B2: Thử nghiệm Hiệu suất năng lượng (VNEEP).",
+          "B3: Chứng nhận Hợp quy (Tại Cục Viễn thông/TT KĐPT).",
+          "B4: Công bố Hợp quy & Đăng ký dán nhãn năng lượng (Bộ Công Thương)."
+        ],
+        notes: "Lưu ý: Pin Lithium bên trong cần thử nghiệm theo QCVN 101:2020."
+      },
+      {
+        id: "tablet",
+        name: "Máy tính bảng (Tablet)",
+        category: "CNTT (MIC)",
+        icon: Monitor,
+        source_file: "2-May_Tinh_Bang.csv",
+        regulations: [
+          { type: "An toàn & SAR", code: "QCVN 132:2022 & QCVN 134:2024", body: "MIC" },
+          { type: "Vô tuyến (Wifi/4G)", code: "QCVN 54, 65, 117", body: "MIC" },
+          { type: "Pin Lithium", code: "QCVN 101:2020", body: "MIC" }
+        ],
+        procedure_steps: [
+          "B1: Thử nghiệm trọn gói (RF, EMC, Safety, SAR, Pin).",
+          "B2: Chứng nhận Hợp quy.",
+          "B3: Công bố Hợp quy (Gắn dấu ICT)."
+        ]
+      },
+      {
+        id: "desktop",
+        name: "Máy tính để bàn (Desktop PC)",
+        category: "CNTT (MIC)",
+        icon: Monitor,
+        source_file: "3-Desktop.csv",
+        regulations: [
+          { type: "EMC", code: "QCVN 118:2018/BTTTT", body: "MIC" },
+          { type: "An toàn", code: "QCVN 132:2022 (Nếu có Wifi/BT)", body: "MIC" }
+        ],
+        procedure_steps: [
+          "B1: Thử nghiệm EMC.",
+          "B2: Tự công bố hợp quy (Doanh nghiệp tự làm dựa trên KQ thử nghiệm).",
+          "B3: Gắn dấu hợp quy (ICT)."
+        ]
+      },
+      {
+        id: "mobile",
+        name: "Điện thoại di động (Mobile Phone)",
+        category: "CNTT (MIC)",
+        icon: Wifi,
+        source_file: "4-Mobile_Phone.csv",
+        regulations: [
+          { type: "RF (2G/3G/4G/5G)", code: "QCVN 117, 127, 129", body: "MIC" },
+          { type: "An toàn & Pin", code: "QCVN 132 & QCVN 101", body: "MIC" },
+          { type: "SAR (Hấp thụ)", code: "QCVN 134:2024", body: "MIC" }
+        ],
+        procedure_steps: [
+          "B1: Thử nghiệm đầy đủ các chỉ tiêu.",
+          "B2: Chứng nhận Hợp quy.",
+          "B3: Công bố Hợp quy (Cục Viễn thông)."
+        ],
+        notes: "Từ 7/2024 bắt buộc tắt sóng 2G với thiết bị chỉ có 2G (2G Only)."
+      },
+      {
+        id: "wifi",
+        name: "Thiết bị Wifi / Modem / Router",
+        category: "CNTT (MIC)",
+        icon: Wifi,
+        source_file: "7-Modem_Wifi-Router.csv",
+        regulations: [
+          { type: "Wifi 2.4GHz", code: "QCVN 54:2020", body: "MIC" },
+          { type: "Wifi 5GHz", code: "QCVN 65:2021", body: "MIC" },
+          { type: "EMC", code: "QCVN 112:2017", body: "MIC" }
+        ],
+        procedure_steps: [
+          "B1: Đo kiểm RF & EMC.",
+          "B2: Chứng nhận Hợp quy.",
+          "B3: Công bố Hợp quy."
+        ]
+      },
+      {
+        id: "dect",
+        name: "Điện thoại không dây (DECT Phone)",
+        category: "CNTT (MIC)",
+        icon: Wifi,
+        source_file: "8-Dien_Thoai_DECT.csv",
+        regulations: [
+          { type: "RF DECT", code: "QCVN 22:2010/BTTTT", body: "MIC" },
+          { type: "EMC", code: "QCVN 18:2014/BTTTT", body: "MIC" }
+        ],
+        procedure_steps: [
+          "B1: Đo kiểm.",
+          "B2: Chứng nhận Hợp quy.",
+          "B3: Công bố."
+        ]
+      },
+      {
+        id: "stb",
+        name: "Set Top Box (Đầu thu KTS)",
+        category: "CNTT (MIC)",
+        icon: Monitor,
+        source_file: "6-Set_Top_Box.csv",
+        regulations: [
+          { type: "DVB-T2", code: "QCVN 63:2012/BTTTT", body: "MIC" },
+          { type: "EMC", code: "QCVN 118:2018", body: "MIC" },
+          { type: "An toàn", code: "QCVN 132:2022", body: "MIC" }
+        ],
+        procedure_steps: [
+          "B1: Thử nghiệm.",
+          "B2: Công bố hợp quy."
+        ]
+      },
+
+      // --- NHÓM 2: GIA DỤNG (MOST + MOIT) ---
+      {
+        id: "ac",
+        name: "Điều hòa không khí (Air Conditioner)",
+        category: "Gia dụng (MOST/MOIT)",
+        icon: Snowflake,
+        source_file: "9.Dieu_Hoa.csv",
+        regulations: [
+          { type: "EMC", code: "QCVN 9:2012/BKHCN", body: "MOST" },
+          { type: "Hiệu suất năng lượng", code: "TCVN 7830:2021", body: "MOIT" },
+          { type: "An toàn", code: "TCVN 5699-2-40", body: "MOST" }
+        ],
+        procedure_steps: [
+          "B1: Thử nghiệm EMC & VNEEP tại PGL.",
+          "B2: Chứng nhận Hợp quy (QCVN 9) -> Gắn dấu CR.",
+          "B3: Đăng ký dán nhãn năng lượng (Bộ Công Thương)."
+        ]
+      },
+      {
+        id: "fridge",
+        name: "Tủ lạnh (Refrigerator)",
+        category: "Gia dụng (MOST/MOIT)",
+        icon: Snowflake,
+        source_file: "10.Tu_Lanh.csv",
+        regulations: [
+          { type: "EMC", code: "QCVN 9:2012/BKHCN", body: "MOST" },
+          { type: "Hiệu suất năng lượng", code: "TCVN 7828:2016", body: "MOIT" }
+        ],
+        procedure_steps: [
+          "B1: Thử nghiệm EMC & VNEEP.",
+          "B2: Chứng nhận Hợp quy (CR) & Công bố dán nhãn năng lượng."
+        ]
+      },
+      {
+        id: "microwave",
+        name: "Lò vi sóng (Microwave)",
+        category: "Gia dụng (MOST)",
+        icon: Zap,
+        source_file: "13-Lo_Vi_Song.csv",
+        regulations: [
+          { type: "An toàn", code: "QCVN 4:2009/BKHCN", body: "MOST" },
+          { type: "EMC", code: "QCVN 9:2012/BKHCN", body: "MOST" }
+        ],
+        procedure_steps: [
+          "B1: Thử nghiệm An toàn & EMC.",
+          "B2: Chứng nhận Hợp quy (Lô hàng hoặc Quá trình SX).",
+          "B3: Gắn dấu CR."
+        ]
+      },
+      {
+        id: "stove",
+        name: "Bếp điện / Bếp từ",
+        category: "Gia dụng (MOST)",
+        icon: Zap,
+        source_file: "11.Bep_Dien.csv",
+        regulations: [
+          { type: "EMC", code: "QCVN 9:2012/BKHCN", body: "MOST" },
+          { type: "An toàn", code: "TCVN 5699-2-9 (IEC 60335-2-9)", body: "MOST" }
+        ],
+        procedure_steps: [
+          "B1: Thử nghiệm EMC.",
+          "B2: Chứng nhận Hợp quy (CR).",
+          "B3: Công bố hợp quy."
+        ]
+      },
+      {
+        id: "tv",
+        name: "Ti vi (Tivi)",
+        category: "Gia dụng (MOIT)",
+        icon: Monitor,
+        source_file: "5-Tivi.csv",
+        regulations: [
+          { type: "Hiệu suất năng lượng", code: "TCVN 9536:2021", body: "MOIT" },
+          { type: "DVB-T2 (Nếu có)", code: "QCVN 63:2012", body: "MIC" }
+        ],
+        procedure_steps: [
+          "B1: Thử nghiệm VNEEP.",
+          "B2: Công bố dán nhãn năng lượng."
+        ]
+      },
+      {
+        id: "led",
+        name: "Đèn LED",
+        category: "Gia dụng (MOST/MOIT)",
+        icon: Zap,
+        source_file: "12-Den_LED.csv",
+        regulations: [
+          { type: "An toàn & EMC", code: "QCVN 19:2019/BKHCN", body: "MOST" },
+          { type: "Hiệu suất năng lượng", code: "TCVN 11844:2017", body: "MOIT" }
+        ],
+        procedure_steps: [
+          "B1: Thử nghiệm QCVN 19 (Safety + EMC) & VNEEP.",
+          "B2: Chứng nhận Hợp quy (CR).",
+          "B3: Dán nhãn năng lượng (Bắt buộc với một số loại)."
+        ]
+      }
+    ];
+
+    // COMPONENTS
+    const RegulationBadge = ({ reg }) => {
+      let className = "text-xs px-2 py-1 rounded font-medium border ";
+      if (reg.body === "MIC") className += "badge-mic";
+      else if (reg.body === "MOST") className += "badge-most";
+      else className += "badge-moit";
+
+      return html`
+        <span className=${className}>
+          ${reg.code}
+        </span>
+      `;
+    };
+
+    const ProductCard = ({ item }) => {
+      const [expanded, setExpanded] = useState(false);
+
+      return html`
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden animate-in">
+          <div 
+            className="p-5 cursor-pointer flex items-start justify-between"
+            onClick=${() => setExpanded(!expanded)}
+          >
+            <div className="flex gap-4">
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-blue-600 shrink-0">
+                <${item.icon} size=${24} />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-800 text-lg">${item.name}</h3>
+                <div className="text-sm text-slate-500 mb-2">${item.category}</div>
+                <div className="flex flex-wrap gap-2">
+                  ${item.regulations.slice(0, 2).map((reg, idx) => html`
+                    <${RegulationBadge} key=${idx} reg=${reg} />
+                  `)}
+                  ${item.regulations.length > 2 && html`
+                    <span className="text-xs text-slate-400 py-1">+${item.regulations.length - 2}</span>
+                  `}
+                </div>
+              </div>
+            </div>
+            <button className="text-slate-400 hover:text-blue-600">
+              ${expanded ? html`<${ChevronUp} size=${20} />` : html`<${ChevronDown} size=${20} />`}
+            </button>
+          </div>
+
+          ${expanded && html`
+            <div className="px-5 pb-5 pt-0 border-t border-slate-100 bg-slate-50/50">
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <${BookOpen} size=${16} /> Quy chuẩn áp dụng
+                  </h4>
+                  <ul className="space-y-2">
+                    ${item.regulations.map((reg, idx) => html`
+                      <li key=${idx} className="flex items-start gap-2 text-sm bg-white p-2 rounded border border-slate-200">
+                        <span className=${`text-[10px] font-bold px-1.5 py-0.5 rounded ${reg.body === 'MIC' ? 'bg-blue-100 text-blue-700' : reg.body === 'MOST' ? 'bg-pink-100 text-pink-700' : 'bg-green-100 text-green-700'}`}>
+                          ${reg.body}
+                        </span>
+                        <span className="text-slate-700 font-medium">${reg.type}:</span>
+                        <span className="text-slate-600 flex-1">${reg.code}</span>
+                      </li>
+                    `)}
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <${CheckCircle} size=${16} /> Quy trình thực hiện
+                  </h4>
+                  <div className="relative border-l-2 border-slate-200 ml-2 space-y-4">
+                    ${item.procedure_steps.map((step, idx) => html`
+                      <div key=${idx} className="ml-4 relative">
+                        <div className="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full bg-blue-500 border-2 border-white ring-1 ring-slate-200"></div>
+                        <p className="text-sm text-slate-700 leading-relaxed">${step}</p>
+                      </div>
+                    `)}
+                  </div>
+                  
+                  ${item.notes && html`
+                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex gap-2 text-sm text-yellow-800">
+                      <${AlertCircle} size=${16} className="shrink-0 mt-0.5" />
+                      <div>${item.notes}</div>
+                    </div>
+                  `}
+                </div>
+              </div>
+              
+              <div className="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center text-xs text-slate-400">
+                <span>Nguồn dữ liệu: ${item.source_file}</span>
+                <button className="text-blue-600 font-bold hover:underline">Xem chi tiết báo giá >></button>
+              </div>
+            </div>
+          `}
+        </div>
+      `;
+    };
+
+    const App = () => {
+      const [query, setQuery] = useState('');
+      const [filterCat, setFilterCat] = useState('All');
+
+      const filteredData = useMemo(() => {
+        return PROCEDURE_DATA.filter(item => {
+          const matchQuery = item.name.toLowerCase().includes(query.toLowerCase()) || 
+                             item.regulations.some(r => r.code.toLowerCase().includes(query.toLowerCase()));
+          const matchCat = filterCat === 'All' || item.category.includes(filterCat);
+          return matchQuery && matchCat;
+        });
+      }, [query, filterCat]);
+
+      return html`
+        <div className="min-h-screen flex flex-col md:flex-row">
+          <aside className="w-full md:w-72 bg-white border-r border-slate-200 h-auto md:h-screen sticky top-0 z-20 flex flex-col shadow-sm">
+            <div className="p-6 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="bg-gradient-to-br from-indigo-600 to-blue-500 text-white p-2.5 rounded-xl shadow-lg shadow-blue-200">
+                  <${FileText} size=${28} />
+                </div>
+                <div>
+                  <h1 className="font-extrabold text-xl text-slate-800 tracking-tight">PGL Proc</h1>
+                  <p className="text-xs text-slate-500 font-medium">Tra cứu thủ tục v1.0</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 flex-1 overflow-y-auto">
+              <div className="mb-6">
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">Tìm kiếm</label>
+                <div className="relative group">
+                  <${Search} className="absolute left-3 top-2.5 text-slate-400 group-focus-within:text-blue-500" size=${18} />
+                  <input 
+                    type="text"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all"
+                    placeholder="Tên SP, QCVN..."
+                    value=${query}
+                    onChange=${e => setQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">Lọc theo nhóm</label>
+                <div className="space-y-2">
+                  <button onClick=${() => setFilterCat('All')} className=${`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${filterCat === 'All' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'}`}>
+                    <${ShieldCheck} size=${16} /> Tất cả
+                  </button>
+                  <button onClick=${() => setFilterCat('MIC')} className=${`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${filterCat === 'MIC' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'text-slate-600 hover:bg-slate-100'}`}>
+                    <${Wifi} size=${16} /> CNTT & Viễn thông (MIC)
+                  </button>
+                  <button onClick=${() => setFilterCat('MOST')} className=${`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${filterCat === 'MOST' ? 'bg-pink-100 text-pink-700 border border-pink-200' : 'text-slate-600 hover:bg-slate-100'}`}>
+                    <${Zap} size=${16} /> Gia dụng (MOST/CR)
+                  </button>
+                  <button onClick=${() => setFilterCat('MOIT')} className=${`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${filterCat === 'MOIT' ? 'bg-green-100 text-green-700 border border-green-200' : 'text-slate-600 hover:bg-slate-100'}`}>
+                    <${Zap} size=${16} /> Năng lượng (VNEEP)
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 text-xs text-slate-400 border-t border-slate-100 text-center">
+              Dữ liệu tổng hợp từ Bảng tóm tắt sản phẩm 2026
+            </div>
+          </aside>
+
+          <main className="flex-1 p-4 md:p-8 h-screen overflow-y-auto">
+            <div className="max-w-5xl mx-auto">
+              <div className="flex justify-between items-end mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-800">Danh sách thủ tục</h2>
+                  <p className="text-slate-500 text-sm mt-1">Hướng dẫn thực hiện đo kiểm & chứng nhận theo từng loại sản phẩm</p>
+                </div>
+                <span className="text-sm font-medium text-slate-500 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200">
+                  ${filteredData.length} kết quả
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                ${filteredData.map(item => html`
+                  <${ProductCard} key=${item.id} item=${item} />
+                `)}
+                
+                ${filteredData.length === 0 && html`
+                  <div className="text-center py-20">
+                    <div className="bg-white p-6 rounded-full inline-block mb-4 shadow-sm">
+                      <${Search} size=${40} className="text-slate-300" />
+                    </div>
+                    <h3 className="text-slate-600 font-medium text-lg">Không tìm thấy sản phẩm nào</h3>
+                    <p className="text-slate-400 text-sm">Thử tìm kiếm từ khóa khác như "Wifi", "Tủ lạnh"...</p>
+                  </div>
+                `}
+              </div>
+            </div>
+          </main>
+        </div>
+      `;
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(html`<${App} />`);
+  </script>
+</body>
+</html>
