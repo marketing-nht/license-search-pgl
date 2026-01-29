@@ -3,32 +3,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PGL Procedure Lookup v3.1 (Full 13 Products)</title>
+  <title>PGL Assistant v4.0 (Procedures & Pricing)</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
-    .animate-fadeIn { animation: fadeIn 0.4s ease-out forwards; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    
-    /* Toggle Switch Style */
-    .toggle-checkbox:checked { right: 0; border-color: #2563eb; }
-    .toggle-checkbox:checked + .toggle-label { background-color: #2563eb; }
-    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
     /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-    /* Vertical Timeline Line */
-    .timeline-line::before { content: ''; position: absolute; top: 0; bottom: 0; left: 16px; width: 2px; background: #e2e8f0; z-index: 0; }
+    /* Timeline Styles */
+    .timeline-line::before { 
+      content: ''; position: absolute; top: 10px; bottom: 0; left: 15px; width: 2px; background: #e2e8f0; z-index: 0; 
+    }
+
+    /* Print Styles */
+    @media print {
+      @page { size: A4; margin: 1.5cm; }
+      body { background-color: white; }
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      .print-break-inside { break-inside: avoid; }
+      
+      /* Hide procedure cards when printing quote */
+      .procedure-card { display: none !important; }
+    }
+    .print-only { display: none; }
   </style>
   <script type="importmap">
   {
     "imports": {
-      "react": "https://esm.sh/react@18.2.0",
-      "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-      "lucide-react": "https://esm.sh/lucide-react@0.294.0",
+      "react": "https://esm.sh/react@19.0.0",
+      "react-dom": "https://esm.sh/react-dom@19.0.0",
+      "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+      "lucide-react": "https://esm.sh/lucide-react@0.460.0?external=react",
       "htm": "https://esm.sh/htm@3.1.1"
     }
   }
@@ -41,21 +61,22 @@
     import React, { useState, useMemo } from 'react';
     import ReactDOM from 'react-dom/client';
     import { 
-      Search, FileText, Globe, Factory, ShieldCheck, 
-      Zap, Wifi, Battery, AlertTriangle, BookOpen, Layers,
-      ChevronDown, ChevronUp, Box, Monitor, Tv, Server, Phone
+      Search, Calculator, FileText, Settings, Info, Loader2, AlertCircle, Copy, Check, 
+      ShoppingCart, Plus, Trash2, Printer, X, CreditCard,
+      Globe, Factory, ShieldCheck, Layers, ChevronDown, ChevronUp, Box, Monitor, Tv, Server, Phone, Zap, Wifi
     } from 'lucide-react';
     import htm from 'htm';
+
     const html = htm.bind(React.createElement);
 
     // ==========================================
-    // DỮ LIỆU THỦ TỤC & TÍNH NĂNG CHI TIẾT (13 SẢN PHẨM)
+    // 1. DỮ LIỆU THỦ TỤC (13 NHÓM SẢN PHẨM)
     // ==========================================
     const PROCEDURES = [
-      // 1. LAPTOP
       {
         id: "laptop",
-        name: "1. Máy tính xách tay (Laptop)",
+        name: "Máy tính xách tay (Laptop)",
+        keywords: ["laptop", "máy tính xách tay", "notebook"],
         group: "CNTT (MIC) & Năng lượng",
         icon: Globe,
         features: [
@@ -74,10 +95,10 @@
         ],
         domestic_steps: ["B1: Thử nghiệm mẫu.", "B2: Chứng nhận Hợp quy.", "B3: Công bố Hợp quy.", "B4: Dán nhãn năng lượng."]
       },
-      // 2. TABLET
       {
         id: "tablet",
-        name: "2. Máy tính bảng (Tablet)",
+        name: "Máy tính bảng (Tablet)",
+        keywords: ["tablet", "máy tính bảng", "ipad"],
         group: "CNTT & Viễn thông",
         icon: Box,
         features: [
@@ -95,10 +116,10 @@
         ],
         domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận & Công bố Hợp quy.", "B3: Dán tem."]
       },
-      // 3. DESKTOP
       {
         id: "desktop",
-        name: "3. Máy tính để bàn (Desktop)",
+        name: "Máy tính để bàn (Desktop)",
+        keywords: ["desktop", "máy tính để bàn", "pc", "máy tính"],
         group: "CNTT & Năng lượng",
         icon: Monitor,
         features: [
@@ -106,17 +127,13 @@
           { name: "EMC", reg: "QCVN 118:2018", desc: "Tự công bố hợp quy" },
           { name: "Wifi (Nếu có)", reg: "QCVN 54, 65", desc: "Nếu có card wifi" }
         ],
-        import_steps: [
-          "B1: Thử nghiệm HSNL & EMC tại PGL.",
-          "B2: Công bố dán nhãn năng lượng (Bộ Công Thương).",
-          "B3: Tự công bố hợp quy EMC (Sở TTTT)."
-        ],
+        import_steps: ["B1: Thử nghiệm HSNL & EMC tại PGL.", "B2: Công bố dán nhãn năng lượng (Bộ Công Thương).", "B3: Tự công bố hợp quy EMC (Sở TTTT)."],
         domestic_steps: ["B1: Thử nghiệm.", "B2: Công bố dán nhãn & Hợp quy."]
       },
-      // 4. MOBILE PHONE
       {
         id: "mobile",
-        name: "4. Điện thoại di động",
+        name: "Điện thoại di động",
+        keywords: ["điện thoại", "mobile", "smartphone", "di động"],
         group: "Viễn thông (MIC)",
         icon: Phone,
         features: [
@@ -125,18 +142,13 @@
           { name: "SAR", reg: "QCVN 134:2024", desc: "Đo an toàn bức xạ" },
           { name: "Pin Lithium", reg: "QCVN 101:2020", desc: "An toàn pin" }
         ],
-        import_steps: [
-          "B1: Đăng ký KTCL (Cục Viễn thông).",
-          "B2: Đo kiểm tại PGL.",
-          "B3: Chứng nhận Hợp quy.",
-          "B4: Công bố & Dán tem ICT."
-        ],
+        import_steps: ["B1: Đăng ký KTCL (Cục Viễn thông).", "B2: Đo kiểm tại PGL.", "B3: Chứng nhận Hợp quy.", "B4: Công bố & Dán tem ICT."],
         domestic_steps: ["B1: Đo kiểm.", "B2: Chứng nhận.", "B3: Công bố."]
       },
-      // 5. TIVI
       {
         id: "tv",
-        name: "5. Ti vi (Television)",
+        name: "Ti vi (Television)",
+        keywords: ["tv", "tivi", "máy thu hình", "television"],
         group: "Gia dụng & Viễn thông",
         icon: Tv,
         features: [
@@ -145,18 +157,13 @@
           { name: "Wifi/BT", reg: "QCVN 54, 65", desc: "Smart TV" },
           { name: "EMC", reg: "QCVN 118:2018", desc: "Nếu có cổng LAN/Wifi" }
         ],
-        import_steps: [
-          "B1: Đăng ký KTCL (Cho phần DVB-T2/Wifi).",
-          "B2: Thử nghiệm HSNL & RF.",
-          "B3: Chứng nhận & Công bố Hợp quy.",
-          "B4: Dán nhãn năng lượng."
-        ],
+        import_steps: ["B1: Đăng ký KTCL (Cho phần DVB-T2/Wifi).", "B2: Thử nghiệm HSNL & RF.", "B3: Chứng nhận & Công bố Hợp quy.", "B4: Dán nhãn năng lượng."],
         domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận & Công bố."]
       },
-      // 6. SET TOP BOX
       {
         id: "stb",
-        name: "6. Đầu thu (Set Top Box)",
+        name: "Đầu thu (Set Top Box)",
+        keywords: ["đầu thu", "set top box", "stb", "dvb"],
         group: "Viễn thông (MIC)",
         icon: Server,
         features: [
@@ -164,35 +171,26 @@
           { name: "EMC", reg: "QCVN 118:2018", desc: "Tương thích điện từ" },
           { name: "An toàn điện", reg: "QCVN 132:2022", desc: "Bắt buộc" }
         ],
-        import_steps: [
-          "B1: Đăng ký KTCL trên VNSW.",
-          "B2: Thử nghiệm tại PGL.",
-          "B3: Công bố Hợp quy.",
-          "B4: Dán tem ICT."
-        ],
+        import_steps: ["B1: Đăng ký KTCL trên VNSW.", "B2: Thử nghiệm tại PGL.", "B3: Công bố Hợp quy.", "B4: Dán tem ICT."],
         domestic_steps: ["B1: Thử nghiệm.", "B2: Công bố Hợp quy."]
       },
-      // 7. MODEM WIFI
       {
         id: "wifi-router",
-        name: "7. Modem / Wifi Router",
+        name: "Modem / Wifi Router",
+        keywords: ["wifi", "modem", "router", "access point", "cục phát wifi"],
         group: "Viễn thông (MIC)",
         icon: Wifi,
         features: [
           { name: "Wifi 2.4G/5G", reg: "QCVN 54, 65", desc: "RF Test" },
           { name: "EMC", reg: "QCVN 112:2017", desc: "EMC thiết bị vô tuyến" }
         ],
-        import_steps: [
-          "B1: Đăng ký KTCL.",
-          "B2: Thử nghiệm & Chứng nhận Hợp quy.",
-          "B3: Công bố Hợp quy."
-        ],
+        import_steps: ["B1: Đăng ký KTCL.", "B2: Thử nghiệm & Chứng nhận Hợp quy.", "B3: Công bố Hợp quy."],
         domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận & Công bố."]
       },
-      // 8. DECT PHONE
       {
         id: "dect",
-        name: "8. Điện thoại DECT",
+        name: "Điện thoại DECT",
+        keywords: ["dect", "điện thoại mẹ bồng con", "điện thoại kéo dài"],
         group: "Viễn thông (MIC)",
         icon: Phone,
         features: [
@@ -200,17 +198,13 @@
           { name: "EMC", reg: "QCVN 18:2014", desc: "Tương thích điện từ" },
           { name: "An toàn", reg: "QCVN 132:2022", desc: "An toàn điện" }
         ],
-        import_steps: [
-          "B1: Đăng ký KTCL.",
-          "B2: Chứng nhận Hợp quy.",
-          "B3: Công bố & Dán tem."
-        ],
+        import_steps: ["B1: Đăng ký KTCL.", "B2: Chứng nhận Hợp quy.", "B3: Công bố & Dán tem."],
         domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận."]
       },
-      // 9. ĐIỀU HÒA
       {
         id: "ac",
-        name: "9. Điều hòa không khí",
+        name: "Điều hòa không khí",
+        keywords: ["điều hòa", "máy lạnh", "air conditioner", "ac"],
         group: "Gia dụng (MOST) & Năng lượng",
         icon: Zap,
         features: [
@@ -218,18 +212,13 @@
           { name: "Hiệu suất NL", reg: "TCVN 7830:2021", desc: "Dán nhãn năng lượng" },
           { name: "An toàn (LVD)", reg: "TCVN 5699-2-40", desc: "Thử nghiệm an toàn" }
         ],
-        import_steps: [
-          "B1: Đăng ký Kiểm tra chất lượng (Sở KHCN).",
-          "B2: Thử nghiệm EMC & HSNL tại PGL.",
-          "B3: Chứng nhận Hợp quy (Lô hàng) & Kết quả HSNL.",
-          "B4: Thông quan & Dán tem."
-        ],
+        import_steps: ["B1: Đăng ký Kiểm tra chất lượng (Sở KHCN).", "B2: Thử nghiệm EMC & HSNL tại PGL.", "B3: Chứng nhận Hợp quy (Lô hàng) & Kết quả HSNL.", "B4: Thông quan & Dán tem."],
         domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận Hợp quy (3 năm).", "B3: Công bố.", "B4: Dán tem."]
       },
-      // 10. TỦ LẠNH
       {
         id: "fridge",
-        name: "10. Tủ lạnh",
+        name: "Tủ lạnh",
+        keywords: ["tủ lạnh", "tủ đông", "tủ mát", "fridge", "freezer"],
         group: "Gia dụng & Năng lượng",
         icon: Box,
         features: [
@@ -237,18 +226,13 @@
           { name: "Hiệu suất NL", reg: "TCVN 7828:2016", desc: "Dán nhãn năng lượng" },
           { name: "An toàn", reg: "TCVN 5699-2-24", desc: "IEC 60335-2-24" }
         ],
-        import_steps: [
-          "B1: Đăng ký KTCL.",
-          "B2: Thử nghiệm EMC & HSNL.",
-          "B3: Chứng nhận Hợp quy.",
-          "B4: Dán tem CR & Năng lượng."
-        ],
+        import_steps: ["B1: Đăng ký KTCL.", "B2: Thử nghiệm EMC & HSNL.", "B3: Chứng nhận Hợp quy.", "B4: Dán tem CR & Năng lượng."],
         domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận 3 năm.", "B3: Dán tem."]
       },
-      // 11. BẾP ĐIỆN
       {
         id: "stove",
-        name: "11. Bếp điện (Từ/Hồng ngoại)",
+        name: "Bếp điện (Từ/Hồng ngoại)",
+        keywords: ["bếp điện", "bếp từ", "bếp hồng ngoại", "lò nướng"],
         group: "Gia dụng & Năng lượng",
         icon: Zap,
         features: [
@@ -256,36 +240,26 @@
           { name: "An toàn", reg: "TCVN 5699-2-9", desc: "Thử nghiệm LVD" },
           { name: "Hiệu suất NL", reg: "TCVN 13372/13373", desc: "Dán nhãn năng lượng" }
         ],
-        import_steps: [
-          "B1: Đăng ký KTCL (Sở KHCN).",
-          "B2: Thử nghiệm EMC & Safety.",
-          "B3: Chứng nhận Hợp quy (Lô hàng).",
-          "B4: Công bố HSNL (Bộ Công Thương)."
-        ],
+        import_steps: ["B1: Đăng ký KTCL (Sở KHCN).", "B2: Thử nghiệm EMC & Safety.", "B3: Chứng nhận Hợp quy (Lô hàng).", "B4: Công bố HSNL (Bộ Công Thương)."],
         domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận Hợp quy.", "B3: Công bố."]
       },
-      // 12. ĐÈN LED
       {
         id: "led",
-        name: "12. Đèn LED",
+        name: "Đèn LED",
+        keywords: ["đèn led", "led", "bóng đèn", "chiếu sáng"],
         group: "Gia dụng & Năng lượng",
         icon: Zap,
         features: [
           { name: "An toàn & EMC", reg: "QCVN 19:2019/BKHCN", desc: "Bắt buộc CR" },
           { name: "Hiệu suất NL", reg: "TCVN 11844:2017", desc: "Dán nhãn năng lượng" }
         ],
-        import_steps: [
-          "B1: Đăng ký KTCL.",
-          "B2: Thử nghiệm QCVN 19 & HSNL.",
-          "B3: Chứng nhận Hợp quy.",
-          "B4: Dán tem CR & Năng lượng."
-        ],
+        import_steps: ["B1: Đăng ký KTCL.", "B2: Thử nghiệm QCVN 19 & HSNL.", "B3: Chứng nhận Hợp quy.", "B4: Dán tem CR & Năng lượng."],
         domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận 3 năm.", "B3: Công bố."]
       },
-      // 13. LÒ VI SÓNG
       {
         id: "microwave",
-        name: "13. Lò vi sóng",
+        name: "Lò vi sóng",
+        keywords: ["lò vi sóng", "microwave"],
         group: "Gia dụng (MOST)",
         icon: Box,
         features: [
@@ -293,49 +267,189 @@
           { name: "EMC", reg: "QCVN 9:2012/BKHCN", desc: "Sửa đổi 1:2018" },
           { name: "Hiệu suất NL", reg: "TCVN 13663:2023", desc: "Dự thảo bắt buộc" }
         ],
-        import_steps: [
-          "B1: Đăng ký KTCL.",
-          "B2: Thử nghiệm An toàn & EMC.",
-          "B3: Chứng nhận Hợp quy (Phương thức 7).",
-          "B4: Thông quan & Dán tem CR."
-        ],
+        import_steps: ["B1: Đăng ký KTCL.", "B2: Thử nghiệm An toàn & EMC.", "B3: Chứng nhận Hợp quy (Phương thức 7).", "B4: Thông quan & Dán tem CR."],
         domestic_steps: ["B1: Thử nghiệm.", "B2: Chứng nhận (Phương thức 5).", "B3: Dán tem."]
       }
     ];
 
-    // COMPONENT: CARD
+    // ==========================================
+    // 2. DỮ LIỆU BÁO GIÁ (2026 - v3.0)
+    // ==========================================
+    const PGL_PRICING_CONTEXT = `
+[DỮ LIỆU BÁO GIÁ MỚI - SỐ: 26012001/PGL-BG - NGÀY: 20/01/2026]
+
+A. CHỨNG NHẬN HỢP QUY VÀ HỢP CHUẨN:
+
+I. QCVN 9:2012/BKHCN (EMC Gia dụng):
+- Điều hòa không khí (AC): Thường 2.000.000 VNĐ; Multi (1 mẹ 2 con) 3.000.000 VNĐ (+1.000.000 VNĐ/mặt lạnh tiếp theo).
+- Đồng giá 2.000.000 VNĐ cho: Tủ lạnh, Tủ giữ lạnh, Lò vi sóng, Bếp điện, Máy xay sinh tố/thịt, Ép trái cây, Đánh trứng, Máy sấy tóc, Bình nước nóng, Máy giặt, Máy khoan, Máy hút bụi, Bóng đèn compact.
+- Phí cấp lại bản gốc tiếp theo: 500.000 VNĐ/bản.
+
+II. QCVN 4:2009/BKHCN (An toàn điện):
+- Phương thức 5 (Đánh giá nhà máy):
+  + Nhà máy trong nước: Đánh giá quá trình SX 30.000.000 VNĐ; Giám sát 15.000.000 VNĐ/lần.
+  + Nhà máy nước ngoài: Đánh giá quá trình SX 50.000.000 VNĐ; Giám sát 25.000.000 VNĐ/lần.
+- Phương thức 7 (Theo lô hàng):
+  + Lô 1-3 model: 3.000.000 VNĐ.
+  + Từ model thứ 4: +500.000 VNĐ/model.
+  + Công văn xác nhận miễn trừ: 2.000.000 VNĐ (1-2 model).
+
+III. QCVN 19:2019/BKHCN (Đèn LED):
+- Đồng giá 2.000.000 VNĐ cho: Bóng đèn LED có ba lát lắp liền, Đèn LED hai đầu, Đèn LED cố định/di động.
+- Công văn xác nhận miễn trừ: 2.000.000 VNĐ (1-2 model).
+
+IV. CHỨNG NHẬN HỢP CHUẨN (Phương thức 1):
+- Model đầu tiên: 3.000.000 VNĐ. Model thứ 2-5: 2.000.000 VNĐ.
+
+V. QCVN 25:2025/BKHCN (Ổ cắm, phích cắm):
+- Chứng nhận hợp quy: 5.000.000 VNĐ/lô.
+
+B. THỬ NGHIỆM (TESTING):
+
+I. HIỆU SUẤT NĂNG LƯỢNG (VNEEP):
+- Điều hòa: Non-Inverter <=60k BTU (15tr); Inverter <=60k BTU (20tr); Giấu trần nối ống gió (25-40tr).
+- Tủ lạnh/Tủ đông: <=500L (9tr); >500L (11tr).
+- Bếp điện (Từ/Hồng ngoại): 1 vùng (3tr); 2 vùng (5tr); 3 vùng (6tr); 4 vùng (7tr); 5 vùng (8tr).
+- Quạt điện: <50W (3tr); >=50W (4tr); Quạt trần (5tr).
+- Đèn LED: Thông dụng <=100W (4tr); Đèn đường <=100W (7tr); 100-200W (9tr); >200W (11tr).
+- Thiết bị văn phòng: Máy in/Photocopy/Màn hình (1.5-2.5tr). Laptop/PC (3-4tr).
+- Máy thu hình (TV): 3.5tr (Ko ABC); 4.5tr (Có ABC).
+- Máy giặt: <=10kg (4tr); >10kg (5tr).
+- Bình nóng lạnh: <70L (5tr); >=70L (7tr). Lò vi sóng (20tr); Lò nướng (15tr); Máy sấy quần áo (10tr).
+
+II. THỬ NGHIỆM EMC (QCVN 9:2012):
+- Điều hòa: 1 chiều <24k BTU (13tr); >=24k BTU (15tr).
+- Tủ lạnh, Máy giặt: 9tr. Lò vi sóng: 10tr.
+- Bếp điện: 1 vùng (6tr); >=2 vùng (7tr).
+- Máy xay/ép/hút bụi: 5tr. Máy khoan: 5-7tr.
+
+III. THỬ NGHIỆM AN TOÀN ĐIỆN (QCVN 4:2009):
+- Bình nóng lạnh, Máy sấy, Bàn là, Nồi cơm, Quạt, Ấm đun: Lần đầu 6tr; Lần 2 (2tr).
+- Lò vi sóng: Lần đầu 8tr; Lần 2 (2tr).
+
+IV. THỬ NGHIỆM LED (QCVN 19:2019):
+- Trọn gói (An toàn + EMC + Quang sinh học): 25tr (Ko IP) hoặc 27tr (Có IP).
+- Thử lẻ: An toàn (5tr), EMI (6tr), EMS (9tr), Quang sinh học (5tr). IP (1tr/cấp).
+
+VI. AN TOÀN ĐIỆN IT (QCVN 132:2022 - IEC 62368):
+- Thiết bị thông dụng (Thân máy + 1 adapter): 23.000.000 VNĐ.
+- Phụ phí: Chức năng đặc biệt (+5tr); Adapter tích hợp (+11.5tr); Adapter rời (+5-7tr); Thiết bị chứa chất lỏng áp suất (+20tr).
+
+VII. PIN LITHIUM (QCVN 101:2020):
+- Gói pin (Pack): 8tr. Tế bào (Cell): 8tr.
+- Trọn gói (1 Pack + 1 Cell): 16tr. (1 Pack + 2 Cell): 20tr.
+
+VIII & IX. VIỄN THÔNG & SAR (CẬP NHẬT 2026):
+- SAR QCVN 134:2024:
+  + Điện thoại 3G+4G (Ko CA): 860tr. Có CA: 1.040tr.
+  + Điện thoại 5G (Ko CA): 1.125tr. Có CA: 1.300tr.
+  + Tablet (Wifi): 290-435tr. Tablet (3G/4G/5G): 580-980tr. Laptop (Wifi): 290tr.
+- RF Khác:
+  + 5G Combo (127/129/18): 575tr.
+  + QCVN 117 (2G/3G/4G): 12-35tr.
+  + Wifi (54/65): 7-10tr. NFC: 6tr.
+
+X. Ổ CẮM, PHÍCH CẮM (QCVN 25:2025):
+- Thử nghiệm trọn gói chứng nhận: 18.000.000 VNĐ. Thử theo yêu cầu: 8.000.000 VNĐ.
+
+THÔNG TIN THANH TOÁN:
+- Chủ TK: Công ty Cổ phần Phòng thử nghiệm Phúc Gia.
+- Số TK: 896668 tại Ngân hàng Á Châu (ACB) - CN Trần Duy Hưng.
+- Lưu ý: Đơn giá chưa bao gồm VAT 5%.
+`;
+
+    // --- GEMINI SERVICE ---
+    const searchPricing = async (query) => {
+      const apiKey = ""; // Environment provided
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+      const promptText = `Bạn là Trợ lý AI của PGL Lab. Tra cứu báo giá cho: "${query}" từ dữ liệu sau.
+
+      QUY TẮC:
+      1. Chỉ dùng dữ liệu trong [DỮ LIỆU BÁO GIÁ].
+      2. Ưu tiên giá VNĐ. Trả về số nguyên (VD: 2000000).
+      3. VAT là 5% (luôn ghi chú "Chưa gồm VAT").
+      4. Tách riêng phí "Chứng nhận" và "Thử nghiệm".
+
+      DỮ LIỆU BÁO GIÁ:
+      ${PGL_PRICING_CONTEXT}`;
+
+      const payload = {
+        contents: [{ parts: [{ text: promptText }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                category: { type: "STRING" },
+                regulation: { type: "STRING" },
+                product_name: { type: "STRING" },
+                price_vnd: { type: "INTEGER" },
+                notes: { type: "STRING" },
+              },
+              required: ["category", "product_name", "price_vnd", "notes"],
+            },
+          },
+        },
+      };
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await response.json();
+        return JSON.parse(data.candidates?.[0]?.content?.parts?.[0]?.text || "[]");
+      } catch (err) {
+        console.error(err);
+        return [];
+      }
+    };
+
+    // --- UI COMPONENTS ---
+
+    // 1. Procedure Card (Thẻ Thủ Tục)
     const ProcedureCard = ({ item }) => {
       const [isImport, setIsImport] = useState(true);
-      const [isOpen, setIsOpen] = useState(false);
+      const [isOpen, setIsOpen] = useState(true); // Default open when searching
 
       return html`
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all mb-6 overflow-hidden animate-fadeIn">
-          <div className="p-5 flex items-center justify-between cursor-pointer bg-gradient-to-r from-slate-50 to-white" onClick=${() => setIsOpen(!isOpen)}>
+        <div className="procedure-card bg-white rounded-2xl border border-indigo-100 shadow-md mb-8 overflow-hidden animate-fadeIn">
+          <div 
+            className="p-5 flex items-center justify-between cursor-pointer bg-gradient-to-r from-indigo-50 to-white" 
+            onClick=${() => setIsOpen(!isOpen)}
+          >
             <div className="flex items-center gap-4">
-              <div className=${`w-14 h-14 rounded-xl flex items-center justify-center text-white shadow-md ${item.group.includes('CNTT') || item.group.includes('Viễn thông') ? 'bg-blue-600' : 'bg-emerald-600'}`}>
+              <div className=${`w-14 h-14 rounded-xl flex items-center justify-center text-white shadow-md ${item.group.includes('CNTT') || item.group.includes('Viễn thông') ? 'bg-indigo-600' : 'bg-teal-600'}`}>
                 <${item.icon} size=${28} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-slate-800">${item.name}</h3>
-                <span className="text-xs font-semibold text-slate-500 bg-white border border-slate-200 px-2 py-1 rounded-md mt-1 inline-block">
+                <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                  ${item.name}
+                  <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Thủ tục</span>
+                </h3>
+                <span className="text-xs font-semibold text-slate-500 mt-1 inline-block">
                   ${item.group}
                 </span>
               </div>
             </div>
-            <button className="text-slate-400 hover:text-blue-600 transition-colors">
+            <button className="text-slate-400 hover:text-indigo-600 transition-colors">
               ${isOpen ? html`<${ChevronUp} size=${24} />` : html`<${ChevronDown} size=${24} />`}
             </button>
           </div>
 
           ${isOpen && html`
-            <div className="border-t border-slate-100">
+            <div className="border-t border-indigo-50">
               <div className="p-6 bg-white">
                 <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4 flex items-center gap-2">
-                  <${ShieldCheck} size=${18} className="text-blue-600"/> Tính năng & Quy chuẩn áp dụng
+                  <${ShieldCheck} size=${18} className="text-indigo-600"/> Quy chuẩn bắt buộc & Tính năng
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   ${item.features.map((feat, idx) => html`
-                    <div key=${idx} className="flex flex-col p-3 rounded-xl border border-slate-100 bg-slate-50 hover:border-blue-200 hover:bg-blue-50 transition-colors">
+                    <div key=${idx} className="flex flex-col p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-indigo-200 transition-colors">
                       <div className="flex justify-between items-start mb-1">
                         <span className="font-bold text-slate-800 text-sm">${feat.name}</span>
                         <span className="text-[10px] font-bold bg-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded shadow-sm">
@@ -357,21 +471,19 @@
                     <button onClick=${() => setIsImport(true)} className=${`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${isImport ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}>
                       <${Globe} size=${14} /> Nhập khẩu
                     </button>
-                    <button onClick=${() => setIsImport(false)} className=${`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${!isImport ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}>
+                    <button onClick=${() => setIsImport(false)} className=${`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${!isImport ? 'bg-teal-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}>
                       <${Factory} size=${14} /> Sản xuất
                     </button>
                   </div>
                 </div>
 
-                <div className="relative pl-6 space-y-6 timeline-line">
+                <div className="relative pl-6 space-y-4 timeline-line">
                   ${(isImport ? item.import_steps : item.domestic_steps).map((step, idx) => html`
                     <div key=${idx} className="relative z-10 animate-fadeIn">
-                      <div className=${`absolute -left-[31px] top-1 w-4 h-4 rounded-full border-2 border-white shadow-sm flex items-center justify-center ${isImport ? 'bg-blue-500' : 'bg-emerald-500'}`}>
-                        <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-                      </div>
+                      <div className=${`absolute -left-[28px] top-1.5 w-3 h-3 rounded-full border-2 border-white shadow-sm ${isImport ? 'bg-blue-500' : 'bg-teal-500'}`}></div>
                       <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
-                        <p className="text-sm text-slate-700 leading-relaxed font-medium">
-                          <span className=${`font-bold mr-1 ${isImport ? 'text-blue-600' : 'text-emerald-600'}`}>B${idx + 1}:</span> 
+                        <p className="text-sm text-slate-700 font-medium">
+                          <span className=${`font-bold mr-1 ${isImport ? 'text-blue-600' : 'text-teal-600'}`}>B${idx + 1}:</span> 
                           ${step}
                         </p>
                       </div>
@@ -385,57 +497,422 @@
       `;
     };
 
-    const App = () => {
-      const [query, setQuery] = useState('');
-      
-      const filteredData = useMemo(() => {
-        if (!query) return PROCEDURES;
-        return PROCEDURES.filter(p => 
-          p.name.toLowerCase().includes(query.toLowerCase()) || 
-          p.features.some(f => f.reg.toLowerCase().includes(query.toLowerCase()))
-        );
-      }, [query]);
+    // 2. Pricing Card (Thẻ Báo Giá)
+    const PricingCard = ({ item, onAdd }) => html`
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition-all animate-fadeIn flex flex-col justify-between h-full">
+        <div>
+          <div className="flex justify-between items-start mb-2">
+            <span className="px-2 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold uppercase rounded-md border border-blue-100">
+              ${item.category}
+            </span>
+          </div>
+          <h3 className="font-bold text-slate-800 text-lg mb-1 leading-snug">${item.product_name}</h3>
+          <p className="text-xs text-slate-500 flex items-center gap-1 mb-4">
+            <${FileText} size=${12} /> ${item.regulation}
+          </p>
+          <div className="bg-slate-50 p-3 rounded-xl mb-4 border border-slate-100">
+            <p className="text-xs text-slate-500 italic">"${item.notes}"</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
+          <div className="text-xl font-black text-blue-600">
+            ${item.price_vnd.toLocaleString('vi-VN')} <span className="text-xs font-normal text-slate-400">VNĐ</span>
+          </div>
+          <button 
+            onClick=${() => onAdd(item)}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 active:scale-95 transition-all text-sm shadow-sm shadow-blue-200"
+          >
+            <${Plus} size=${16} /> Thêm
+          </button>
+        </div>
+      </div>
+    `;
+
+    // 3. Print View
+    const QuotePrintView = ({ items, customerInfo }) => {
+      const subtotal = items.reduce((sum, item) => sum + item.price_vnd, 0);
+      const vat = subtotal * 0.05;
+      const total = subtotal + vat;
+      const date = new Date().toLocaleDateString('vi-VN');
 
       return html`
-        <div className="min-h-screen flex flex-col md:flex-row bg-slate-100">
-          <aside className="w-full md:w-80 bg-white border-r border-slate-200 p-6 hidden md:block h-screen sticky top-0 overflow-y-auto">
-            <div className="flex items-center gap-3 mb-10">
-              <div className="bg-indigo-600 p-3 rounded-xl text-white shadow-xl shadow-indigo-200"><${BookOpen} size=${28} /></div>
-              <div><h1 className="font-extrabold text-xl text-slate-900">PGL Guide</h1><p className="text-xs text-slate-500">Tra cứu thủ tục v3.1</p></div>
+        <div className="print-only p-8 max-w-[21cm] mx-auto bg-white text-black text-sm leading-snug font-serif">
+          <!-- Header -->
+          <div className="flex justify-between items-start border-b-2 border-black pb-4 mb-6">
+            <div>
+              <h1 className="text-2xl font-bold uppercase text-red-600 font-sans">Phúc Gia® Lab</h1>
+              <p className="font-bold">CÔNG TY CỔ PHẦN PHÒNG THỬ NGHIỆM PHÚC GIA</p>
+              <p>ĐC: Cảng cạn Long Biên, Số 1 Huỳnh Tấn Phát, Long Biên, Hà Nội</p>
+              <p>Hotline: 0982.996.696 - Email: lab@phucgia.com.vn</p>
             </div>
-            <div className="space-y-6">
-              <div className="bg-blue-50 p-5 rounded-2xl border border-blue-100">
-                <h3 className="font-bold text-blue-900 text-sm mb-2"><${Globe} size=${16} className="inline mr-1"/> Hàng Nhập khẩu</h3>
-                <p className="text-xs text-blue-700">Đăng ký kiểm tra trên Cổng 1 cửa (VNSW) hoặc Sở KHCN địa phương.</p>
+            <div className="text-right">
+              <h2 className="text-xl font-bold font-sans">BÁO GIÁ DỊCH VỤ</h2>
+              <p>Số: 26012001/PGL-BG</p>
+              <p>Ngày: ${date}</p>
+            </div>
+          </div>
+
+          <!-- Customer Info -->
+          <div className="mb-6">
+            <p><strong>Kính gửi:</strong> ${customerInfo.name || "Quý Khách hàng"}</p>
+            <p><strong>Đơn vị:</strong> ${customerInfo.company || "..."}</p>
+            <p>PGL xin trân trọng gửi tới Quý khách hàng báo giá dịch vụ như sau:</p>
+          </div>
+
+          <!-- Table -->
+          <table className="w-full border-collapse border border-black mb-6">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-black p-2 w-12 text-center">STT</th>
+                <th className="border border-black p-2 text-left">Nội dung dịch vụ / Sản phẩm</th>
+                <th className="border border-black p-2 w-32 text-left">Quy chuẩn</th>
+                <th className="border border-black p-2 w-40 text-right">Đơn giá (VNĐ)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${items.map((item, index) => html`
+                <tr key=${index}>
+                  <td className="border border-black p-2 text-center">${index + 1}</td>
+                  <td className="border border-black p-2">
+                    <span className="font-semibold">${item.product_name}</span>
+                    <br/>
+                    <span className="text-xs italic text-gray-600">${item.category}</span>
+                  </td>
+                  <td className="border border-black p-2 text-xs">${item.regulation || "-"}</td>
+                  <td className="border border-black p-2 text-right font-medium">
+                    ${item.price_vnd.toLocaleString('vi-VN')}
+                  </td>
+                </tr>
+              `)}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan="3" className="border border-black p-2 text-right font-bold">Cộng tiền hàng:</td>
+                <td className="border border-black p-2 text-right font-bold">${subtotal.toLocaleString('vi-VN')}</td>
+              </tr>
+              <tr>
+                <td colSpan="3" className="border border-black p-2 text-right font-bold">Thuế GTGT (VAT 5%):</td>
+                <td className="border border-black p-2 text-right font-bold">${vat.toLocaleString('vi-VN')}</td>
+              </tr>
+              <tr className="bg-gray-100">
+                <td colSpan="3" className="border border-black p-2 text-right font-bold text-lg">TỔNG CỘNG:</td>
+                <td className="border border-black p-2 text-right font-bold text-lg text-red-600">${total.toLocaleString('vi-VN')}</td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <!-- Footer Info -->
+          <div className="grid grid-cols-2 gap-8 mt-8 print-break-inside">
+            <div>
+              <h3 className="font-bold underline mb-2">Thông tin thanh toán:</h3>
+              <p>• Chủ TK: Công ty CP Phòng thử nghiệm Phúc Gia</p>
+              <p>• Số TK: <strong>896668</strong></p>
+              <p>• Ngân hàng: ACB - CN Trần Duy Hưng</p>
+            </div>
+            <div>
+              <h3 className="font-bold underline mb-2">Lưu ý:</h3>
+              <ul className="list-disc list-inside text-xs">
+                <li>Báo giá có hiệu lực trong vòng 30 ngày.</li>
+                <li>Phí thử nghiệm nhanh (Gấp): Nhân 1.5 lần giá cơ sở.</li>
+                <li>Thử nghiệm lại (Fail): Hỗ trợ thu 50% phí niêm yết.</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="mt-12 text-center">
+             <p className="font-bold">ĐẠI DIỆN CÔNG TY</p>
+             <div className="h-24"></div>
+             <p>Tổng Giám Đốc</p>
+             <p className="font-bold uppercase">Mai Thị Vân</p>
+          </div>
+        </div>
+      `;
+    };
+
+    const CartDrawer = ({ cart, onRemove, onClose, onPrint, customerInfo, setCustomerInfo }) => {
+      const subtotal = cart.reduce((sum, item) => sum + item.price_vnd, 0);
+      
+      return html`
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick=${onClose}></div>
+          <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-fadeIn">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center gap-2">
+                <${ShoppingCart} className="text-blue-600" />
+                <h2 className="font-bold text-lg text-slate-800">Báo giá đã chọn ({cart.length})</h2>
               </div>
-              <div className="bg-emerald-50 p-5 rounded-2xl border border-emerald-100">
-                <h3 className="font-bold text-emerald-900 text-sm mb-2"><${Factory} size=${16} className="inline mr-1"/> Sản xuất</h3>
-                <p className="text-xs text-emerald-700">Đánh giá nhà xưởng (Phương thức 5) và Chứng nhận 3 năm.</p>
+              <button onClick=${onClose} className="p-2 hover:bg-slate-200 rounded-full transition-colors"><${X} size=${20} /></button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              ${cart.length === 0 ? html`
+                <div className="text-center text-slate-400 py-10">
+                  <${ShoppingCart} size=${48} className="mx-auto mb-4 opacity-20" />
+                  <p>Chưa có mục nào được chọn.</p>
+                </div>
+              ` : cart.map((item, idx) => html`
+                <div key=${idx} className="flex justify-between items-start gap-3 p-3 bg-white border border-slate-100 rounded-xl shadow-sm">
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-sm text-slate-800 line-clamp-2">${item.product_name}</h4>
+                    <p className="text-xs text-slate-500 mt-1">${item.category}</p>
+                    <p className="text-sm font-bold text-blue-600 mt-1">${item.price_vnd.toLocaleString('vi-VN')} ₫</p>
+                  </div>
+                  <button onClick=${() => onRemove(idx)} className="text-slate-400 hover:text-red-500 p-1">
+                    <${Trash2} size=${16} />
+                  </button>
+                </div>
+              `)}
+
+              ${cart.length > 0 && html`
+                <div className="bg-slate-50 p-4 rounded-xl space-y-3 mt-6 border border-slate-200">
+                  <h3 className="text-xs font-bold uppercase text-slate-400">Thông tin khách hàng (để in)</h3>
+                  <input 
+                    type="text" 
+                    placeholder="Tên người liên hệ" 
+                    className="w-full p-2 text-sm border border-slate-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                    value=${customerInfo.name}
+                    onChange=${(e) => setCustomerInfo({...customerInfo, name: e.target.value})}
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="Tên công ty / Đơn vị" 
+                    className="w-full p-2 text-sm border border-slate-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                    value=${customerInfo.company}
+                    onChange=${(e) => setCustomerInfo({...customerInfo, company: e.target.value})}
+                  />
+                </div>
+              `}
+            </div>
+
+            <div className="p-6 border-t border-slate-100 bg-white">
+              <div className="flex justify-between mb-2 text-slate-600 text-sm">
+                <span>Tạm tính:</span>
+                <span>${subtotal.toLocaleString('vi-VN')} ₫</span>
               </div>
-              <div className="pt-6 border-t border-slate-100">
-                <h4 className="text-xs font-bold text-slate-400 uppercase mb-4">Sản phẩm phổ biến</h4>
-                <div className="flex flex-wrap gap-2">
-                  ${['Laptop', 'Điều hòa', 'Wifi', 'Led', 'Tivi'].map(t => html`<button onClick=${() => setQuery(t)} className="px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded-full text-xs text-slate-600">${t}</button>`)}
+              <div className="flex justify-between mb-4 text-slate-600 text-sm">
+                <span>VAT (5%):</span>
+                <span>${(subtotal * 0.05).toLocaleString('vi-VN')} ₫</span>
+              </div>
+              <div className="flex justify-between mb-6 text-xl font-bold text-slate-800">
+                <span>Tổng cộng:</span>
+                <span className="text-blue-600">${(subtotal * 1.05).toLocaleString('vi-VN')} ₫</span>
+              </div>
+              <button 
+                onClick=${onPrint}
+                disabled=${cart.length === 0}
+                className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-200"
+              >
+                <${Printer} size=${18} /> Xuất Báo Giá PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    };
+
+    const App = () => {
+      const [state, setState] = React.useState({ isSearching: false, query: '', pricingResults: [], procedureResults: [], error: null });
+      const [cart, setCart] = React.useState([]);
+      const [showCart, setShowCart] = React.useState(false);
+      const [customerInfo, setCustomerInfo] = React.useState({ name: '', company: '' });
+
+      const handleSearch = async (e) => {
+        if (e) e.preventDefault();
+        const queryTerm = state.query.trim().toLowerCase();
+        if (!queryTerm) return;
+
+        setState(prev => ({ ...prev, isSearching: true, error: null, pricingResults: [], procedureResults: [] }));
+
+        // 1. Local Search (Procedures)
+        const matchedProcedures = PROCEDURES.filter(p => 
+          p.keywords.some(k => queryTerm.includes(k)) || 
+          p.name.toLowerCase().includes(queryTerm)
+        );
+
+        // 2. AI Search (Pricing)
+        try {
+          const aiData = await searchPricing(state.query);
+          setState(prev => ({ 
+            ...prev, 
+            isSearching: false, 
+            procedureResults: matchedProcedures, 
+            pricingResults: aiData 
+          }));
+        } catch (err) {
+          console.error(err);
+          setState(prev => ({ ...prev, error: 'Hệ thống bận, vui lòng thử lại.', isSearching: false }));
+        }
+      };
+
+      const addToCart = (item) => {
+        setCart([...cart, item]);
+        setShowCart(true);
+      };
+
+      const removeFromCart = (idx) => {
+        setCart(cart.filter((_, i) => i !== idx));
+      };
+
+      const handlePrint = () => {
+        window.print();
+      };
+
+      return html`
+        <div>
+          <!-- Print View -->
+          <${QuotePrintView} items=${cart} customerInfo=${customerInfo} />
+
+          <!-- Main App UI -->
+          <div className="min-h-screen flex flex-col md:flex-row bg-slate-50 text-slate-900 no-print">
+            
+            <!-- Sidebar -->
+            <aside className="w-full md:w-64 bg-white border-r border-slate-200 p-6 flex flex-col gap-8 hidden md:flex sticky top-0 h-screen overflow-y-auto">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+                  <${Calculator} size=${24} />
+                </div>
+                <div>
+                  <h1 className="font-bold text-lg text-slate-800">PGL Assistant</h1>
+                  <p className="text-xs text-slate-500 font-medium">Unified v4.0</p>
                 </div>
               </div>
-            </div>
-          </aside>
+              
+              <nav className="flex flex-col gap-2">
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Menu chính</div>
+                <button className="flex items-center gap-3 px-4 py-3 bg-indigo-50 text-indigo-700 font-bold rounded-xl transition-all">
+                  <${Search} size=${18} /> Tra cứu & Báo giá
+                </button>
+                <button className="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 rounded-xl transition-all">
+                  <${FileText} size=${18} /> Lịch sử tra cứu
+                </button>
+                
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 mt-6">Phím tắt sản phẩm</div>
+                <div className="flex flex-wrap gap-2">
+                  ${['Laptop', 'Điều hòa', 'Tivi', 'Đèn LED', 'Pin'].map(kw => html`
+                    <button 
+                      onClick=${() => setState(prev => ({...prev, query: kw}))}
+                      className="px-3 py-1.5 bg-slate-100 hover:bg-indigo-100 hover:text-indigo-600 text-xs text-slate-600 rounded-lg transition-colors"
+                    >
+                      ${kw}
+                    </button>
+                  `)}
+                </div>
+              </nav>
 
-          <main className="flex-1 p-4 md:p-10 h-screen overflow-y-auto">
-            <div className="max-w-4xl mx-auto">
-              <div className="mb-8">
-                <h2 className="text-3xl font-black text-slate-900 mb-2">Tra cứu Thủ tục</h2>
-                <p className="text-slate-500">Hướng dẫn 13 nhóm sản phẩm theo quy định mới nhất 2026</p>
+              <div className="mt-auto bg-gradient-to-br from-indigo-50 to-white p-4 rounded-xl border border-indigo-100">
+                <h3 className="text-sm font-semibold text-indigo-900 mb-1">Dữ liệu 2026</h3>
+                <p className="text-xs text-indigo-700 leading-relaxed">
+                  Cập nhật QCVN mới nhất & VAT 5% cho toàn bộ báo giá.
+                </p>
               </div>
-              <div className="relative mb-8 group z-10">
-                <${Search} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500" size=${22} />
-                <input type="text" className="w-full pl-14 pr-6 py-4 bg-white border-2 border-slate-200 rounded-2xl shadow-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all text-lg" placeholder="Tìm sản phẩm..." value=${query} onChange=${e => setQuery(e.target.value)} autoFocus />
+            </aside>
+
+            <!-- Main Content -->
+            <main className="flex-1 flex flex-col h-screen overflow-hidden">
+              <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 z-20">
+                <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                  <span className="md:hidden"><${Calculator} size=${16}/></span>
+                  Tra cứu Thủ tục & Báo giá
+                </h2>
+                <button 
+                  onClick=${() => setShowCart(true)}
+                  className="relative p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-colors group"
+                >
+                  <${ShoppingCart} size=${20} className="group-hover:text-blue-600 transition-colors" />
+                  ${cart.length > 0 && html`
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white shadow-sm">
+                      ${cart.length}
+                    </span>
+                  `}
+                </button>
+              </header>
+
+              <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50/50">
+                <div className="max-w-5xl mx-auto">
+                  
+                  <!-- Search Section -->
+                  <div className="text-center mb-10">
+                    <h1 className="text-3xl font-black text-slate-800 mb-2 tracking-tight">Trợ lý PGL Toàn năng</h1>
+                    <p className="text-slate-500 text-lg">Nhập tên thiết bị để xem <span className="text-indigo-600 font-bold">Thủ tục</span> và <span className="text-blue-600 font-bold">Báo giá 2026</span></p>
+                    
+                    <form onSubmit=${handleSearch} className="mt-8 flex gap-2 max-w-xl mx-auto relative group z-10">
+                      <${Search} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size=${22} />
+                      <input
+                        type="text"
+                        placeholder="VD: Điều hòa, Máy tính xách tay,..."
+                        className="w-full pl-14 pr-4 py-4 bg-white border-2 border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all shadow-sm text-lg"
+                        value=${state.query}
+                        onChange=${(e) => setState(prev => ({ ...prev, query: e.target.value }))}
+                      />
+                      <button
+                        disabled=${state.isSearching || !state.query.trim()}
+                        className="absolute right-2 top-2 bottom-2 px-6 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white font-bold rounded-xl shadow-md transition-all flex items-center gap-2"
+                      >
+                        ${state.isSearching ? html`<${Loader2} className="animate-spin" size=${20} />` : 'Tìm kiếm'}
+                      </button>
+                    </form>
+                  </div>
+
+                  <!-- Results Area -->
+                  ${state.isSearching && html`
+                    <div className="text-center py-20 text-indigo-500 flex flex-col items-center">
+                      <${Loader2} className="animate-spin mb-4" size=${40} />
+                      <p className="font-medium">AI đang phân tích dữ liệu...</p>
+                    </div>
+                  `}
+
+                  ${!state.isSearching && (state.procedureResults.length > 0 || state.pricingResults.length > 0) && html`
+                    <div className="animate-fadeIn">
+                      <!-- 1. Procedure Results (Top) -->
+                      ${state.procedureResults.length > 0 && html`
+                        <div className="mb-8">
+                          <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <span className="w-8 h-[1px] bg-slate-300"></span> Thủ tục & Quy trình
+                          </h3>
+                          ${state.procedureResults.map(p => html`<${ProcedureCard} key=${p.id} item=${p} />`)}
+                        </div>
+                      `}
+
+                      <!-- 2. Pricing Results (Bottom) -->
+                      ${state.pricingResults.length > 0 && html`
+                        <div className="mb-20">
+                          <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <span className="w-8 h-[1px] bg-slate-300"></span> Báo giá tham khảo
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            ${state.pricingResults.map((item, idx) => html`
+                              <${PricingCard} key=${idx} item=${item} onAdd=${addToCart} />
+                            `)}
+                          </div>
+                        </div>
+                      `}
+                    </div>
+                  `}
+
+                  ${!state.isSearching && state.query && state.procedureResults.length === 0 && state.pricingResults.length === 0 && html`
+                    <div className="text-center py-20 text-slate-400 bg-white rounded-3xl border-2 border-dashed border-slate-200">
+                      <p>Không tìm thấy kết quả phù hợp cho "${state.query}".</p>
+                      <p className="text-sm mt-2">Vui lòng thử từ khóa khác (VD: "Laptop", "Tivi").</p>
+                    </div>
+                  `}
+                  
+                </div>
               </div>
-              <div className="space-y-4">
-                ${filteredData.map(item => html`<${ProcedureCard} key=${item.id} item=${item} />`)}
-              </div>
-            </div>
-          </main>
+            </main>
+
+            <!-- Cart Drawer -->
+            ${showCart && html`
+              <${CartDrawer} 
+                cart=${cart} 
+                onRemove=${removeFromCart} 
+                onClose=${() => setShowCart(false)} 
+                onPrint=${handlePrint}
+                customerInfo=${customerInfo}
+                setCustomerInfo=${setCustomerInfo}
+              />
+            `}
+          </div>
         </div>
       `;
     };
