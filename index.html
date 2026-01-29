@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PGL Assistant v4.0 (Procedures & Pricing)</title>
+  <title>PGL Assistant v4.1 (Tabbed Interface)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -62,7 +62,7 @@
     import ReactDOM from 'react-dom/client';
     import { 
       Search, Calculator, FileText, Settings, Info, Loader2, AlertCircle, Copy, Check, 
-      ShoppingCart, Plus, Trash2, Printer, X, CreditCard,
+      ShoppingCart, Plus, Trash2, Printer, X, CreditCard, ArrowRight,
       Globe, Factory, ShieldCheck, Layers, ChevronDown, ChevronUp, Box, Monitor, Tv, Server, Phone, Zap, Wifi
     } from 'lucide-react';
     import htm from 'htm';
@@ -412,9 +412,9 @@ THÔNG TIN THANH TOÁN:
     // --- UI COMPONENTS ---
 
     // 1. Procedure Card (Thẻ Thủ Tục)
-    const ProcedureCard = ({ item }) => {
+    const ProcedureCard = ({ item, onSwitchToPricing }) => {
       const [isImport, setIsImport] = useState(true);
-      const [isOpen, setIsOpen] = useState(true); // Default open when searching
+      const [isOpen, setIsOpen] = useState(true);
 
       return html`
         <div className="procedure-card bg-white rounded-2xl border border-indigo-100 shadow-md mb-8 overflow-hidden animate-fadeIn">
@@ -447,7 +447,7 @@ THÔNG TIN THANH TOÁN:
                 <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4 flex items-center gap-2">
                   <${ShieldCheck} size=${18} className="text-indigo-600"/> Quy chuẩn bắt buộc & Tính năng
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
                   ${item.features.map((feat, idx) => html`
                     <div key=${idx} className="flex flex-col p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-indigo-200 transition-colors">
                       <div className="flex justify-between items-start mb-1">
@@ -459,6 +459,15 @@ THÔNG TIN THANH TOÁN:
                       <p className="text-xs text-slate-500 italic">${feat.desc}</p>
                     </div>
                   `)}
+                </div>
+                
+                <div className="flex justify-end">
+                   <button 
+                     onClick=${onSwitchToPricing}
+                     className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors border border-blue-100 hover:border-blue-200"
+                   >
+                     Xem báo giá tham khảo <${ArrowRight} size=${14} />
+                   </button>
                 </div>
               </div>
 
@@ -713,6 +722,7 @@ THÔNG TIN THANH TOÁN:
 
     const App = () => {
       const [state, setState] = React.useState({ isSearching: false, query: '', pricingResults: [], procedureResults: [], error: null });
+      const [activeTab, setActiveTab] = React.useState('procedures'); // 'procedures' | 'pricing'
       const [cart, setCart] = React.useState([]);
       const [showCart, setShowCart] = React.useState(false);
       const [customerInfo, setCustomerInfo] = React.useState({ name: '', company: '' });
@@ -723,6 +733,7 @@ THÔNG TIN THANH TOÁN:
         if (!queryTerm) return;
 
         setState(prev => ({ ...prev, isSearching: true, error: null, pricingResults: [], procedureResults: [] }));
+        setActiveTab('procedures'); // Reset tab to procedures on new search
 
         // 1. Local Search (Procedures)
         const matchedProcedures = PROCEDURES.filter(p => 
@@ -739,6 +750,11 @@ THÔNG TIN THANH TOÁN:
             procedureResults: matchedProcedures, 
             pricingResults: aiData 
           }));
+          
+          // Auto switch to pricing if no procedure found but pricing found
+          if (matchedProcedures.length === 0 && aiData.length > 0) {
+            setActiveTab('pricing');
+          }
         } catch (err) {
           console.error(err);
           setState(prev => ({ ...prev, error: 'Hệ thống bận, vui lòng thử lại.', isSearching: false }));
@@ -774,7 +790,7 @@ THÔNG TIN THANH TOÁN:
                 </div>
                 <div>
                   <h1 className="font-bold text-lg text-slate-800">PGL Assistant</h1>
-                  <p className="text-xs text-slate-500 font-medium">Unified v4.0</p>
+                  <p className="text-xs text-slate-500 font-medium">Unified v4.1</p>
                 </div>
               </div>
               
@@ -864,27 +880,56 @@ THÔNG TIN THANH TOÁN:
 
                   ${!state.isSearching && (state.procedureResults.length > 0 || state.pricingResults.length > 0) && html`
                     <div className="animate-fadeIn">
-                      <!-- 1. Procedure Results (Top) -->
-                      ${state.procedureResults.length > 0 && html`
-                        <div className="mb-8">
-                          <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <span className="w-8 h-[1px] bg-slate-300"></span> Thủ tục & Quy trình
-                          </h3>
-                          ${state.procedureResults.map(p => html`<${ProcedureCard} key=${p.id} item=${p} />`)}
+                      <!-- Tab Headers -->
+                      <div className="flex border-b border-slate-200 mb-6">
+                        <button 
+                          onClick=${() => setActiveTab('procedures')}
+                          className=${`px-6 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'procedures' ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-slate-500 hover:text-indigo-600'}`}
+                        >
+                          <${Layers} size=${16} /> Quy trình & Thủ tục (${state.procedureResults.length})
+                        </button>
+                        <button 
+                          onClick=${() => setActiveTab('pricing')}
+                          className=${`px-6 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'pricing' ? 'border-blue-600 text-blue-700' : 'border-transparent text-slate-500 hover:text-blue-600'}`}
+                        >
+                          <${Calculator} size=${16} /> Báo giá & Chi phí (${state.pricingResults.length})
+                        </button>
+                      </div>
+
+                      <!-- Tab Content: Procedures -->
+                      ${activeTab === 'procedures' && html`
+                        <div className="animate-fadeIn">
+                          ${state.procedureResults.length > 0 ? state.procedureResults.map(p => html`
+                            <${ProcedureCard} 
+                              key=${p.id} 
+                              item=${p} 
+                              onSwitchToPricing=${() => setActiveTab('pricing')}
+                            />
+                          `) : html`
+                            <div className="text-center py-10 text-slate-400 bg-white rounded-xl border border-slate-100">
+                              <p>Không tìm thấy quy trình cụ thể cho từ khóa này.</p>
+                              <button onClick=${() => setActiveTab('pricing')} className="mt-2 text-blue-600 font-bold hover:underline">
+                                Xem báo giá tham khảo liên quan
+                              </button>
+                            </div>
+                          `}
                         </div>
                       `}
 
-                      <!-- 2. Pricing Results (Bottom) -->
-                      ${state.pricingResults.length > 0 && html`
-                        <div className="mb-20">
-                          <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <span className="w-8 h-[1px] bg-slate-300"></span> Báo giá tham khảo
-                          </h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            ${state.pricingResults.map((item, idx) => html`
-                              <${PricingCard} key=${idx} item=${item} onAdd=${addToCart} />
-                            `)}
-                          </div>
+                      <!-- Tab Content: Pricing -->
+                      ${activeTab === 'pricing' && html`
+                        <div className="animate-fadeIn">
+                          ${state.pricingResults.length > 0 ? html`
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-20">
+                              ${state.pricingResults.map((item, idx) => html`
+                                <${PricingCard} key=${idx} item=${item} onAdd=${addToCart} />
+                              `)}
+                            </div>
+                          ` : html`
+                            <div className="text-center py-10 text-slate-400 bg-white rounded-xl border border-slate-100">
+                              <p>Chưa có dữ liệu báo giá phù hợp.</p>
+                            </div>
+                          `}
                         </div>
                       `}
                     </div>
